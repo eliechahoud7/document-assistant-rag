@@ -1,0 +1,27 @@
+{
+  "name": "real_v1",
+  "kind": "real",
+  "description": "MODÈLE à copier (ex. real_v1.json) et à compléter. Placer les PDF dans evaluation/documents/ (dossier ignoré par Git). Annoter SANS utiliser le moteur de recherche : lire le PDF, écrire la question, copier une citation exacte de la page (telle qu'extraite et nettoyée, voir evaluation/README.md). Inclure des questions sans réponse proches des documents.",
+  "documents": [
+    {"path": "../documents/mon_document.pdf", "lang": "fr"}
+  ],
+  "questions": [
+    {
+      "id": "q01",
+      "lang": "fr",
+      "category": "paraphrase",
+      "answerable": true,
+      "question": "Votre question, formulée sans recopier les mots du passage ?",
+      "references": [
+        {"filename": "mon_document.pdf", "page": 1, "quote": "citation exacte, 20 à 150 caractères, présente une seule fois sur la page"}
+      ]
+    },
+    {
+      "id": "u01",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "question": "Une question sur le même sujet, mais dont la réponse n'est pas dans les documents ?"
+    }
+  ]
+}

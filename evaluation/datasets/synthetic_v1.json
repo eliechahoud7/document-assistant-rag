@@ -1,0 +1,147 @@
+{
+  "name": "synthetic_v1",
+  "kind": "synthetic",
+  "description": "Jeu SYNTHÉTIQUE rédigé pour le projet (documents et questions écrits par le même auteur, avant toute mesure). Les faits sont illustratifs et ne doivent pas être cités comme source. Difficultés volontaires : passages voisins sur un même sujet (L1/L2/dropout/arrêt précoce, deux pompes à chaleur, deux traités), sujets traités en français ET en anglais, pages de plus de 800 caractères, questions interlingues, questions sans réponse proches des documents. Références = citations exactes, définies à la main sans utiliser le moteur de recherche.",
+  "documents": [
+    {
+      "filename": "ml_regularisation_fr.pdf",
+      "lang": "fr",
+      "pages": [
+        "Un modèle surappris obtient d'excellents résultats sur les données d'entraînement mais se dégrade sur des données nouvelles. L'écart entre l'erreur d'entraînement et l'erreur de validation est le symptôme le plus simple à surveiller.",
+        "La régularisation L2, appelée ridge en régression, ajoute à la fonction de coût la somme des carrés des coefficients multipliée par un hyperparamètre lambda. Elle réduit la taille de tous les coefficients sans en annuler aucun, ce qui stabilise le modèle lorsque les variables sont corrélées.",
+        "La régularisation L1, ou lasso, pénalise la somme des valeurs absolues des coefficients. Contrairement à L2, la pénalité L1 pousse certains coefficients exactement à zéro : elle réalise donc une sélection de variables automatique.",
+        "Le dropout désactive aléatoirement une fraction des neurones à chaque itération d'entraînement, typiquement entre 20 et 50 %. Le réseau ne peut plus compter sur un neurone particulier, ce qui le force à apprendre des représentations redondantes. Au moment de la prédiction, tous les neurones sont utilisés.",
+        "La validation croisée à k plis divise les données en k sous-ensembles de taille comparable. Le modèle est entraîné k fois, chaque fois sur k-1 plis, puis évalué sur le pli restant ; la moyenne des k scores estime la performance sur des données inconnues. Avec k = 5 ou k = 10, on obtient un bon compromis entre le biais et la variance de cette estimation, pour un coût de calcul raisonnable. L'arrêt précoce surveille l'erreur sur un jeu de validation pendant l'entraînement et interrompt l'apprentissage dès que cette erreur cesse de diminuer pendant un nombre d'époques fixé, appelé patience. Il évite de poursuivre l'optimisation au-delà du point où le modèle commence à mémoriser le bruit. Enfin, l'augmentation de données crée artificiellement de nouveaux exemples, par exemple en retournant, en recadrant ou en modifiant légèrement les couleurs des images, ce qui enrichit le jeu d'entraînement sans aucune collecte supplémentaire de données."
+      ]
+    },
+    {
+      "filename": "deep_learning_notes_en.pdf",
+      "lang": "en",
+      "pages": [
+        "Batch normalization rescales the activations of each layer using the mean and variance computed on the current mini-batch. It allows higher learning rates and makes training less sensitive to weight initialization.",
+        "Dropout randomly switches off a fraction of the units during training, which prevents units from co-adapting. A dropout rate of 0.5 is a common default for fully connected layers.",
+        "The learning rate controls the size of each gradient descent step. If it is too large, the loss oscillates or diverges; if it is too small, training is very slow. Learning-rate schedules such as cosine decay reduce it progressively.",
+        "Adam combines momentum with a per-parameter adaptive learning rate based on running averages of the gradient and of its square. Its default hyperparameters are beta1 = 0.9 and beta2 = 0.999.",
+        "Transfer learning reuses a network pretrained on a large dataset, such as ImageNet, and fine-tunes it on a smaller target task. Freezing the early layers is common because they capture generic features like edges and textures."
+      ]
+    },
+    {
+      "filename": "energie_france_fr.pdf",
+      "lang": "fr",
+      "pages": [
+        "En 2023, le nucléaire a fourni environ 65 % de la production d'électricité en France, grâce à un parc de 56 réacteurs répartis sur 18 centrales.",
+        "L'éolien terrestre produit de l'électricité lorsque le vent fait tourner les pales, mais sa production varie fortement d'un jour à l'autre. Les parcs éoliens en mer bénéficient de vents plus réguliers et plus forts.",
+        "Les panneaux photovoltaïques convertissent directement la lumière du soleil en électricité grâce à l'effet photoélectrique dans des cellules de silicium. Leur rendement commercial se situe généralement entre 18 et 23 %.",
+        "Une pompe à chaleur air-eau prélève les calories de l'air extérieur pour chauffer l'eau du circuit de chauffage. Son coefficient de performance diminue quand la température extérieure baisse fortement."
+      ]
+    },
+    {
+      "filename": "climate_energy_en.pdf",
+      "lang": "en",
+      "pages": [
+        "Methane traps far more heat than carbon dioxide over short periods: its global warming potential is about 80 times higher over 20 years. Agriculture, landfills and gas leaks are its main human sources.",
+        "Heat pumps move heat instead of producing it by combustion. A typical coefficient of performance of 3 means that three kilowatt-hours of heat are delivered for each kilowatt-hour of electricity consumed.",
+        "Sea level rise is driven by two processes: the thermal expansion of warming ocean water and the addition of meltwater from glaciers and ice sheets.",
+        "Lithium-ion batteries store electricity by moving lithium ions between the anode and the cathode. Grid-scale battery systems are mostly used to shift solar production from midday to the evening peak.",
+        "Carbon capture and storage separates CO2 from industrial exhaust gases and injects it into deep geological formations, such as depleted oil fields or saline aquifers."
+      ]
+    },
+    {
+      "filename": "histoire_europe_fr.pdf",
+      "lang": "fr",
+      "pages": [
+        "La prise de la Bastille, le 14 juillet 1789, est devenue le symbole du début de la Révolution française.",
+        "Le traité de Versailles, signé le 28 juin 1919, met officiellement fin à la Première Guerre mondiale entre l'Allemagne et les Alliés.",
+        "Le mur de Berlin, construit en 1961, sépare Berlin-Est de Berlin-Ouest jusqu'à sa chute dans la nuit du 9 au 10 novembre 1989.",
+        "Le traité de Rome, signé en 1957 par six pays, crée la Communauté économique européenne, ancêtre de l'Union européenne."
+      ]
+    },
+    {
+      "filename": "history_science_en.pdf",
+      "lang": "en",
+      "pages": [
+        "Johannes Gutenberg's printing press, introduced around 1440, combined movable metal type with an oil-based ink and a modified wine press.",
+        "Edward Jenner tested the first vaccine in 1796 by inoculating a boy with cowpox, which then protected him against smallpox.",
+        "Marie Curie was the first person to win Nobel Prizes in two different sciences: physics in 1903 and chemistry in 1911.",
+        "The Industrial Revolution began in Britain in the late eighteenth century, when mechanised production spread from textile workshops to iron foundries and coal mines. Abundant coal, expanding colonial markets and a growing urban workforce all contributed to this transformation. James Watt's improvements to the steam engine in the 1760s and 1770s, notably the separate condenser, greatly reduced its coal consumption and made it practical for factories located far from rivers. Steam power then transformed transport. The first public steam railway, between Stockton and Darlington, opened in 1825, and the Liverpool and Manchester line followed in 1830 with fully timetabled passenger services. By the middle of the nineteenth century, railways had cut travel times between major British cities from days to hours, reshaping trade, the distribution of newspapers and even the standardisation of clock time across the whole country."
+      ]
+    }
+  ],
+  "questions": [
+    {"id": "q01", "lang": "fr", "category": "paraphrase", "answerable": true, "question": "Quel signe montre qu'un modèle a appris ses données d'entraînement par cœur ?",
+     "references": [{"filename": "ml_regularisation_fr.pdf", "page": 1, "quote": "L'écart entre l'erreur d'entraînement et l'erreur de validation est le symptôme le plus simple à surveiller"}]},
+    {"id": "q02", "lang": "fr", "category": "fine_grained", "answerable": true, "question": "Quelle régularisation annule certains coefficients et sélectionne ainsi les variables ?",
+     "references": [{"filename": "ml_regularisation_fr.pdf", "page": 3, "quote": "la pénalité L1 pousse certains coefficients exactement à zéro"}]},
+    {"id": "q03", "lang": "fr", "category": "fine_grained", "answerable": true, "question": "Quelle pénalité diminue les coefficients sans jamais les mettre à zéro ?",
+     "references": [{"filename": "ml_regularisation_fr.pdf", "page": 2, "quote": "Elle réduit la taille de tous les coefficients sans en annuler aucun"}]},
+    {"id": "q04", "lang": "en", "category": "cross_lingual", "answerable": true, "question": "Which regularization technique performs automatic feature selection?",
+     "references": [{"filename": "ml_regularisation_fr.pdf", "page": 3, "quote": "elle réalise donc une sélection de variables automatique"}]},
+    {"id": "q05", "lang": "fr", "category": "multi_passage", "answerable": true, "question": "Quelle proportion de neurones le dropout désactive-t-il en général ?",
+     "references": [
+       {"filename": "ml_regularisation_fr.pdf", "page": 4, "quote": "typiquement entre 20 et 50 %"},
+       {"filename": "deep_learning_notes_en.pdf", "page": 2, "quote": "A dropout rate of 0.5 is a common default"}]},
+    {"id": "q06", "lang": "en", "category": "multi_passage", "answerable": true, "question": "Why does dropout reduce overfitting?",
+     "references": [
+       {"filename": "deep_learning_notes_en.pdf", "page": 2, "quote": "which prevents units from co-adapting"},
+       {"filename": "ml_regularisation_fr.pdf", "page": 4, "quote": "ce qui le force à apprendre des représentations redondantes"}]},
+    {"id": "q07", "lang": "fr", "category": "long_page", "answerable": true, "question": "Comment fonctionne l'arrêt précoce pendant l'entraînement ?",
+     "references": [{"filename": "ml_regularisation_fr.pdf", "page": 5, "quote": "interrompt l'apprentissage dès que cette erreur cesse de diminuer"}]},
+    {"id": "q08", "lang": "en", "category": "cross_lingual", "answerable": true, "question": "What is the patience parameter in early stopping?",
+     "references": [{"filename": "ml_regularisation_fr.pdf", "page": 5, "quote": "pendant un nombre d'époques fixé, appelé patience"}]},
+    {"id": "q09", "lang": "fr", "category": "cross_lingual", "answerable": true, "question": "Quelles sont les valeurs par défaut des paramètres bêta d'Adam ?",
+     "references": [{"filename": "deep_learning_notes_en.pdf", "page": 4, "quote": "beta1 = 0.9 and beta2 = 0.999"}]},
+    {"id": "q10", "lang": "en", "category": "paraphrase", "answerable": true, "question": "What happens when the step size of gradient descent is set too high?",
+     "references": [{"filename": "deep_learning_notes_en.pdf", "page": 3, "quote": "If it is too large, the loss oscillates or diverges"}]},
+    {"id": "q11", "lang": "fr", "category": "cross_lingual", "answerable": true, "question": "Pourquoi gèle-t-on souvent les premières couches lors du transfert d'apprentissage ?",
+     "references": [{"filename": "deep_learning_notes_en.pdf", "page": 5, "quote": "they capture generic features like edges and textures"}]},
+    {"id": "q12", "lang": "en", "category": "paraphrase", "answerable": true, "question": "Which technique normalizes layer outputs using statistics from the mini-batch?",
+     "references": [{"filename": "deep_learning_notes_en.pdf", "page": 1, "quote": "using the mean and variance computed on the current mini-batch"}]},
+    {"id": "q13", "lang": "fr", "category": "numeric", "answerable": true, "question": "Quelle part de l'électricité française provenait du nucléaire en 2023 ?",
+     "references": [{"filename": "energie_france_fr.pdf", "page": 1, "quote": "environ 65 % de la production d'électricité"}]},
+    {"id": "q14", "lang": "en", "category": "cross_lingual", "answerable": true, "question": "How many nuclear reactors does France operate?",
+     "references": [{"filename": "energie_france_fr.pdf", "page": 1, "quote": "un parc de 56 réacteurs répartis sur 18 centrales"}]},
+    {"id": "q15", "lang": "fr", "category": "paraphrase", "answerable": true, "question": "Pourquoi l'éolien en mer produit-il plus régulièrement que l'éolien terrestre ?",
+     "references": [{"filename": "energie_france_fr.pdf", "page": 2, "quote": "bénéficient de vents plus réguliers et plus forts"}]},
+    {"id": "q16", "lang": "en", "category": "cross_lingual", "answerable": true, "question": "What is the typical efficiency of commercial solar panels?",
+     "references": [{"filename": "energie_france_fr.pdf", "page": 3, "quote": "Leur rendement commercial se situe généralement entre 18 et 23 %"}]},
+    {"id": "q17", "lang": "en", "category": "fine_grained", "answerable": true, "question": "How many units of heat does a heat pump with a COP of 3 deliver per unit of electricity?",
+     "references": [{"filename": "climate_energy_en.pdf", "page": 2, "quote": "three kilowatt-hours of heat are delivered for each kilowatt-hour of electricity consumed"}]},
+    {"id": "q18", "lang": "fr", "category": "fine_grained", "answerable": true, "question": "Que devient le coefficient de performance d'une pompe à chaleur par grand froid ?",
+     "references": [{"filename": "energie_france_fr.pdf", "page": 4, "quote": "Son coefficient de performance diminue quand la température extérieure baisse fortement"}]},
+    {"id": "q19", "lang": "fr", "category": "cross_lingual", "answerable": true, "question": "Quelles activités humaines émettent le plus de méthane ?",
+     "references": [{"filename": "climate_energy_en.pdf", "page": 1, "quote": "Agriculture, landfills and gas leaks are its main human sources"}]},
+    {"id": "q20", "lang": "en", "category": "paraphrase", "answerable": true, "question": "What two factors make the oceans rise?",
+     "references": [{"filename": "climate_energy_en.pdf", "page": 3, "quote": "the thermal expansion of warming ocean water and the addition of meltwater"}]},
+    {"id": "q21", "lang": "fr", "category": "cross_lingual", "answerable": true, "question": "À quoi servent les grandes batteries raccordées au réseau électrique ?",
+     "references": [{"filename": "climate_energy_en.pdf", "page": 4, "quote": "to shift solar production from midday to the evening peak"}]},
+    {"id": "q22", "lang": "fr", "category": "cross_lingual", "answerable": true, "question": "Où stocke-t-on le CO2 capturé dans les fumées industrielles ?",
+     "references": [{"filename": "climate_energy_en.pdf", "page": 5, "quote": "injects it into deep geological formations"}]},
+    {"id": "q23", "lang": "en", "category": "cross_lingual", "answerable": true, "question": "When did the Berlin Wall fall?",
+     "references": [{"filename": "histoire_europe_fr.pdf", "page": 3, "quote": "jusqu'à sa chute dans la nuit du 9 au 10 novembre 1989"}]},
+    {"id": "q24", "lang": "fr", "category": "fine_grained", "answerable": true, "question": "Quel traité a fondé la Communauté économique européenne ?",
+     "references": [{"filename": "histoire_europe_fr.pdf", "page": 4, "quote": "Le traité de Rome, signé en 1957 par six pays"}]},
+    {"id": "q25", "lang": "en", "category": "cross_lingual", "answerable": true, "question": "Which treaty ended the First World War with Germany?",
+     "references": [{"filename": "histoire_europe_fr.pdf", "page": 2, "quote": "met officiellement fin à la Première Guerre mondiale"}]},
+    {"id": "q26", "lang": "fr", "category": "cross_lingual", "answerable": true, "question": "Qui a reçu deux prix Nobel dans deux sciences différentes ?",
+     "references": [{"filename": "history_science_en.pdf", "page": 3, "quote": "Marie Curie was the first person to win Nobel Prizes in two different sciences"}]},
+    {"id": "q27", "lang": "fr", "category": "long_page", "answerable": true, "question": "Quelle amélioration de James Watt a réduit la consommation de charbon des machines à vapeur ?",
+     "references": [{"filename": "history_science_en.pdf", "page": 4, "quote": "notably the separate condenser, greatly reduced its coal consumption"}]},
+    {"id": "q28", "lang": "en", "category": "long_page", "answerable": true, "question": "When did the first public steam railway open?",
+     "references": [{"filename": "history_science_en.pdf", "page": 4, "quote": "The first public steam railway, between Stockton and Darlington, opened in 1825"}]},
+    {"id": "q29", "lang": "fr", "category": "cross_lingual", "answerable": true, "question": "Comment Jenner a-t-il protégé un enfant contre la variole ?",
+     "references": [{"filename": "history_science_en.pdf", "page": 2, "quote": "by inoculating a boy with cowpox"}]},
+    {"id": "q30", "lang": "fr", "category": "paraphrase", "answerable": true, "question": "Quel événement de juillet 1789 symbolise le début de la Révolution ?",
+     "references": [{"filename": "histoire_europe_fr.pdf", "page": 1, "quote": "La prise de la Bastille, le 14 juillet 1789"}]},
+
+    {"id": "u01", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false, "question": "Combien coûte l'installation d'une pompe à chaleur ?"},
+    {"id": "u02", "lang": "en", "category": "unanswerable_on_topic", "answerable": false, "question": "What is the lifespan of a wind turbine?"},
+    {"id": "u03", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false, "question": "Quel taux d'apprentissage faut-il choisir avec la régularisation L1 ?"},
+    {"id": "u04", "lang": "en", "category": "unanswerable_on_topic", "answerable": false, "question": "Who invented the dropout technique?"},
+    {"id": "u05", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false, "question": "Combien de pays ont signé le traité de Versailles ?"},
+    {"id": "u06", "lang": "en", "category": "unanswerable_on_topic", "answerable": false, "question": "How many people died trying to cross the Berlin Wall?"},
+    {"id": "u07", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false, "question": "Quelle quantité d'énergie une batterie lithium-ion stocke-t-elle par kilogramme ?"},
+    {"id": "u08", "lang": "en", "category": "unanswerable_off_topic", "answerable": false, "question": "At what temperature does water boil at high altitude?"},
+    {"id": "u09", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false, "question": "Qui a inventé le moteur à combustion interne ?"},
+    {"id": "u10", "lang": "en", "category": "unanswerable_on_topic", "answerable": false, "question": "How much did a copy of Gutenberg's Bible cost?"}
+  ]
+}

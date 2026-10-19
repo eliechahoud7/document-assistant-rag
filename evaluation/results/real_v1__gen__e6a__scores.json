@@ -1,0 +1,1886 @@
+{
+  "generated_at": "2026-10-19T17:26:08+00:00",
+  "warning": "La correction est estimée par la présence de faits requis (mots-clés avec variantes FR/EN) : c'est un indicateur approximatif, à confirmer par la relecture humaine (paraphrases non reconnues, erreurs factuelles contenant le bon mot, appui des citations).",
+  "dataset": {
+    "name": "real_v1",
+    "sha256": "70dc9444ad5b4e4930e70bf63eecd07266bb8418fbc9cbd6e8bb1dbfc883f791"
+  },
+  "run_config": [
+    {
+      "chunk_overlap": 100,
+      "chunk_size": 800,
+      "context_neighbors": 1,
+      "embedding_model": "intfloat/multilingual-e5-small",
+      "model": "gemini-3.5-flash-lite",
+      "provider": "gemini",
+      "top_k": 5
+    }
+  ],
+  "coverage": {
+    "questions": 20,
+    "scored": 20,
+    "missing": [],
+    "errors": []
+  },
+  "answerable": {
+    "n": 15,
+    "answered": 15,
+    "abstained": 0,
+    "abstained_justified": 0,
+    "abstained_unjustified": 0,
+    "correctness_auto": {
+      "correct": 14,
+      "partial": 0,
+      "incorrect": 1,
+      "abstained": 0
+    },
+    "correctness": {
+      "correct": 14,
+      "partial": 0,
+      "incorrect": 1,
+      "abstained": 0
+    },
+    "by_language": {
+      "en": {
+        "correct": 7,
+        "partial": 0,
+        "incorrect": 1,
+        "abstained": 0
+      },
+      "fr": {
+        "correct": 7,
+        "partial": 0,
+        "incorrect": 0,
+        "abstained": 0
+      }
+    },
+    "by_retrieval": {
+      "reference_in_top_k": {
+        "correct": 14,
+        "partial": 0,
+        "incorrect": 1,
+        "abstained": 0
+      },
+      "reference_missed": {
+        "correct": 0,
+        "partial": 0,
+        "incorrect": 0,
+        "abstained": 0
+      }
+    }
+  },
+  "citations": {
+    "total": 18,
+    "invalid": 0,
+    "reference_precision": 1.0,
+    "reference_recall": 0.9474,
+    "fact_support": 1.0
+  },
+  "unanswerable": {
+    "n": 5,
+    "correct_abstentions": 5,
+    "unsupported_answers": 0
+  },
+  "multi_passage": {
+    "q09": {
+      "reference_ranks": [
+        null,
+        14,
+        null
+      ],
+      "references_cited": [
+        false,
+        true,
+        false
+      ],
+      "facts_matched": [
+        true,
+        true
+      ],
+      "correctness": "correct"
+    },
+    "q10": {
+      "reference_ranks": [
+        null,
+        null,
+        5
+      ],
+      "references_cited": [
+        false,
+        false,
+        true
+      ],
+      "facts_matched": [
+        false,
+        false
+      ],
+      "correctness": "incorrect"
+    },
+    "q11": {
+      "reference_ranks": [
+        2,
+        2,
+        8,
+        6
+      ],
+      "references_cited": [
+        true,
+        true,
+        false,
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "correctness": "correct"
+    }
+  },
+  "outcomes": {
+    "success": 14,
+    "generation_failure": 1,
+    "correct_abstention": 5
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "lang": "en",
+      "category": "paraphrase",
+      "answerable": true,
+      "question": "Why is a maximum-margin boundary less sensitive to noise in the inputs?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "A maximum-margin boundary is less sensitive to noisy examples because it draws the separating boundary as far from the training examples as possible.",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          2
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ]
+      ],
+      "reference_ranks": [
+        1
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture2.pdf",
+          3
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true,
+        true
+      ],
+      "facts_supported_by_citations": [
+        true,
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "weak",
+      "gold_flags": [
+        "L'idée « frontière éloignée des exemples » reste formulable de nombreuses façons : une paraphrase non listée sera comptée comme absente (relecture). La variante isolée « far » a été retirée : elle correspondait aussi à « so far »."
+      ],
+      "outcome": "success"
+    },
+    {
+      "id": "q02",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "question": "Comment appelle-t-on les exemples d'entraînement qui se trouvent exactement sur la marge ?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "Les exemples d'entraînement qui se trouvent exactement sur la marge sont appelés des vecteurs de support (support vectors).",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          6
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture1.pdf",
+          12
+        ],
+        [
+          "lecture1.pdf",
+          12
+        ],
+        [
+          "lecture1.pdf",
+          13
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture3.pdf",
+          2
+        ],
+        [
+          "lecture3.pdf",
+          2
+        ],
+        [
+          "lecture3.pdf",
+          2
+        ]
+      ],
+      "reference_ranks": [
+        5
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture2.pdf",
+          3
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "q03",
+      "lang": "en",
+      "category": "fine_grained",
+      "answerable": true,
+      "question": "When each training point is set aside in turn and the max-margin classifier is retrained without it, what limits the share of set-aside points that end up misclassified?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "The share of set-aside points (leave-one-out cross-validation error) that end up misclassified is limited by the number of support vectors divided by the total number of training examples n.",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ]
+      ],
+      "reference_ranks": [
+        2
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture2.pdf",
+          4
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "weak",
+      "gold_flags": [
+        "Le correcteur automatique vérifie seulement que la réponse mentionne les vecteurs de support ; il NE vérifie PAS la borne complète (nombre de vecteurs de support / n), dont la formule est en outre mal extraite du PDF (« # of support vectors leave-one-out CV error ≤ (7) n ») : à juger en relecture."
+      ],
+      "outcome": "success"
+    },
+    {
+      "id": "q04",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "question": "Que se passe-t-il si l'on augmente beaucoup le coût C des violations de marge ?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "Si l'on augmente la pénalité C pour les violations de marge, alors à un moment donné toutes les variables d'écart s'annulent ($\\xi_t = 0$) et l'on retrouve le séparateur linéaire à marge maximale (si c'est possible).",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture1.pdf",
+          36
+        ],
+        [
+          "lecture1.pdf",
+          36
+        ],
+        [
+          "lecture1.pdf",
+          37
+        ],
+        [
+          "lecture1.pdf",
+          23
+        ],
+        [
+          "lecture1.pdf",
+          23
+        ],
+        [
+          "lecture1.pdf",
+          24
+        ]
+      ],
+      "reference_ranks": [
+        3
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture2.pdf",
+          5
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "q05",
+      "lang": "en",
+      "category": "paraphrase",
+      "answerable": true,
+      "question": "How can the max-margin classifier be modified to tolerate mislabeled or non-separable training examples?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "The maximum margin classifier can be modified to tolerate errors by introducing slack variables for the classification and margin constraints in the optimization problem. This measures the degree to which each margin constraint is violated, associates a cost for the violation, and minimizes these costs together with the norm of the parameter vector.",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ]
+      ],
+      "reference_ranks": [
+        5
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 2,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "q06",
+      "lang": "en",
+      "category": "paraphrase",
+      "answerable": true,
+      "question": "What type of optimization problem has to be solved to train a linear SVM?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "To train a linear SVM, a quadratic programming problem has to be solved, where the objective is quadratic in the parameters with linear constraints.",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          2
+        ],
+        [
+          "lecture2.pdf",
+          2
+        ],
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ]
+      ],
+      "reference_ranks": [
+        2
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture2.pdf",
+          2
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "q07",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "question": "Quel effet la pénalité de régularisation a-t-elle sur les paramètres dans la régression à noyau ?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "L'effet de la pénalité de régularisation est de tirer tous les paramètres vers zéro et de fixer explicitement à zéro les dimensions linéaires des paramètres auxquelles les vecteurs de caractéristiques d'entraînement ne se rapportent pas [2].",
+      "retrieved": [
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture1.pdf",
+          27
+        ],
+        [
+          "lecture1.pdf",
+          27
+        ],
+        [
+          "lecture1.pdf",
+          27
+        ],
+        [
+          "lecture1.pdf",
+          22
+        ],
+        [
+          "lecture1.pdf",
+          22
+        ],
+        [
+          "lecture1.pdf",
+          22
+        ],
+        [
+          "lecture1.pdf",
+          43
+        ],
+        [
+          "lecture1.pdf",
+          43
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ]
+      ],
+      "reference_ranks": [
+        2
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture3.pdf",
+          1
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [
+        "Le mot isolé « zero » n'est plus accepté : il correspondait aussi à « nonzero » ou à « mis exactement à zéro » (comportement du lasso, que le passage n'attribue qu'aux dimensions non informatives). Une négation (« ne pousse pas vers zéro ») n'est pas détectée."
+      ],
+      "outcome": "success"
+    },
+    {
+      "id": "q08",
+      "lang": "en",
+      "category": "fine_grained",
+      "answerable": true,
+      "question": "What computational price do we pay when regression is expressed with inner products between examples?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "When regression is expressed with inner products between examples, finding the estimates requires inverting an n x n matrix, which is the computational cost of dealing with inner products as opposed to handling feature vectors directly.",
+      "retrieved": [
+        [
+          "lecture3.pdf",
+          2
+        ],
+        [
+          "lecture3.pdf",
+          2
+        ],
+        [
+          "lecture3.pdf",
+          2
+        ],
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture3.pdf",
+          1
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          27
+        ],
+        [
+          "lecture1.pdf",
+          27
+        ],
+        [
+          "lecture1.pdf",
+          27
+        ],
+        [
+          "lecture1.pdf",
+          114
+        ],
+        [
+          "lecture1.pdf",
+          114
+        ]
+      ],
+      "reference_ranks": [
+        1
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture3.pdf",
+          2
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true,
+        true
+      ],
+      "facts_supported_by_citations": [
+        true,
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [
+        "La matrice inversée est λI + K ; « inverser la matrice de Gram (n × n) » est accepté comme équivalent. Une taille décrite autrement (ex. « matrice carrée de la taille du jeu d'entraînement ») ne sera pas reconnue."
+      ],
+      "outcome": "success"
+    },
+    {
+      "id": "q09",
+      "lang": "fr",
+      "category": "multi_passage",
+      "answerable": true,
+      "question": "Quels types de noyaux peut-on utiliser à la place du simple produit scalaire ?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "À la place du simple produit scalaire (ou noyau linéaire), on peut utiliser des noyaux polynomiaux, des noyaux gaussiens, des noyaux de séquences et de chaînes (string kernels), ainsi que des noyaux de graphes, entre autres.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          12
+        ],
+        [
+          "lecture1.pdf",
+          12
+        ],
+        [
+          "lecture1.pdf",
+          13
+        ],
+        [
+          "lecture1.pdf",
+          76
+        ],
+        [
+          "lecture1.pdf",
+          76
+        ],
+        [
+          "lecture1.pdf",
+          76
+        ],
+        [
+          "lecture1.pdf",
+          43
+        ],
+        [
+          "lecture1.pdf",
+          43
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ],
+        [
+          "lecture3.pdf",
+          6
+        ],
+        [
+          "lecture3.pdf",
+          6
+        ],
+        [
+          "lecture3.pdf",
+          6
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ]
+      ],
+      "reference_ranks": [
+        null,
+        14,
+        null
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 2,
+      "references_cited": [
+        false,
+        true,
+        false
+      ],
+      "facts_matched": [
+        true,
+        true
+      ],
+      "facts_supported_by_citations": [
+        true,
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "q10",
+      "lang": "en",
+      "category": "multi_passage",
+      "answerable": true,
+      "question": "How does the validation scheme that holds out a single sample at a time actually work?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "The validation scheme that holds out a single sample at a time is called leave-one-out cross validation, which is considered on small datasets where k equals the number of data points n (k = n).",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          83
+        ],
+        [
+          "lecture1.pdf",
+          83
+        ],
+        [
+          "lecture1.pdf",
+          83
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          39
+        ],
+        [
+          "lecture1.pdf",
+          39
+        ],
+        [
+          "lecture1.pdf",
+          87
+        ],
+        [
+          "lecture1.pdf",
+          87
+        ],
+        [
+          "lecture1.pdf",
+          88
+        ],
+        [
+          "lecture1.pdf",
+          108
+        ],
+        [
+          "lecture1.pdf",
+          108
+        ],
+        [
+          "lecture1.pdf",
+          109
+        ],
+        [
+          "lecture1.pdf",
+          95
+        ],
+        [
+          "lecture1.pdf",
+          95
+        ],
+        [
+          "lecture1.pdf",
+          96
+        ]
+      ],
+      "reference_ranks": [
+        null,
+        null,
+        5
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture1.pdf",
+          39
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        false,
+        false,
+        true
+      ],
+      "facts_matched": [
+        false,
+        false
+      ],
+      "facts_supported_by_citations": [],
+      "correctness_auto": "incorrect",
+      "correctness": "incorrect",
+      "human": null,
+      "gold_support": "weak",
+      "gold_flags": [
+        "Le correcteur automatique NE vérifie PAS la procédure complète : ses mots-clés génériques (« remaining », « test ») peuvent figurer dans une réponse incomplète. La relecture doit vérifier les trois étapes : retirer un exemple, entraîner sur le reste, tester sur l'exemple retiré (et répéter pour chacun)."
+      ],
+      "outcome": "generation_failure"
+    },
+    {
+      "id": "q11",
+      "lang": "fr",
+      "category": "multi_passage",
+      "answerable": true,
+      "question": "Quelle pénalité la régression ridge ajoute-t-elle à la fonction de perte ?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "La régression ridge ajoute une pénalité de type λw^2 (ou liée à la norme euclidienne / norme L2) à la fonction de perte.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          114
+        ],
+        [
+          "lecture1.pdf",
+          115
+        ],
+        [
+          "lecture1.pdf",
+          115
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ]
+      ],
+      "reference_ranks": [
+        2,
+        2,
+        8,
+        6
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          115
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 2,
+      "references_cited": [
+        true,
+        true,
+        false,
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "q12",
+      "lang": "en",
+      "category": "fine_grained",
+      "answerable": true,
+      "question": "Which of ridge or lasso can drive some weights exactly to zero, and what is the consequence?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "Lasso regression can drive coefficients (weights) to zero. The consequence is that it performs feature selection; if a coefficient is zero, the corresponding feature is worthless and can be discarded from the data.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          37
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ],
+        [
+          "lecture1.pdf",
+          44
+        ]
+      ],
+      "reference_ranks": [
+        2
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture1.pdf",
+          38
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true,
+        true
+      ],
+      "facts_supported_by_citations": [
+        true,
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "q13",
+      "lang": "fr",
+      "category": "numeric",
+      "answerable": true,
+      "question": "Quelle proportion d'exemples distincts trouve-t-on dans un échantillon bootstrap utilisé pour le bagging ?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "Environ 63,2 % des échantillons d'un échantillon bootstrap (utilisé pour le bagging) sont uniques, les autres étant des doublons.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          71
+        ],
+        [
+          "lecture1.pdf",
+          72
+        ],
+        [
+          "lecture1.pdf",
+          72
+        ],
+        [
+          "lecture1.pdf",
+          88
+        ],
+        [
+          "lecture1.pdf",
+          88
+        ],
+        [
+          "lecture1.pdf",
+          89
+        ],
+        [
+          "lecture1.pdf",
+          73
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          6
+        ]
+      ],
+      "reference_ranks": [
+        3
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture1.pdf",
+          72
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true
+      ],
+      "facts_supported_by_citations": [
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [
+        "Les arrondis « environ 63 % » sont acceptés (le passage donne ≈ 63,2 %). « Deux tiers » ou « 1 − 1/e » ne sont pas acceptés : le premier est inexact, le second ne figure pas dans le passage (relecture)."
+      ],
+      "outcome": "success"
+    },
+    {
+      "id": "q14",
+      "lang": "en",
+      "category": "numeric",
+      "answerable": true,
+      "question": "What train/validation split percentages does the course give as an example?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "The course gives an example of fitting a model on 60% of the training set and using the remaining 40% as a validation set to check model performance.",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture1.pdf",
+          38
+        ],
+        [
+          "lecture1.pdf",
+          39
+        ],
+        [
+          "lecture1.pdf",
+          39
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture1.pdf",
+          39
+        ],
+        [
+          "lecture1.pdf",
+          39
+        ]
+      ],
+      "reference_ranks": [
+        4
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture1.pdf",
+          38
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true
+      ],
+      "facts_matched": [
+        true,
+        true
+      ],
+      "facts_supported_by_citations": [
+        true,
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [
+        "Référence vérifiée : l'exemple 60 % / 40 % figure entièrement en page 38. La page 39 ne le prolonge pas : elle s'ouvre sur une question rhétorique (« 60%? More, less? ») puis présente un autre exemple (validation croisée à 5 plis, 80 / 20). Une citation de la page 39 compte donc à juste titre comme hors référence. Les faits exigent un pourcentage pour ne pas accepter « instances 21 à 40 »."
+      ],
+      "outcome": "success"
+    },
+    {
+      "id": "q15",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "question": "Comment choisir le nombre de groupes dans l'algorithme des k-moyennes ?",
+      "status": "ok",
+      "abstained": false,
+      "abstain_reason": null,
+      "answer": "Pour choisir le nombre de groupes (k) dans l'algorithme des k-moyennes, on peut augmenter k progressivement et rechercher une baisse soudaine de l'erreur, ce qui apparaît comme un « coude » (elbow) sur un graphique représentant k en fonction de l'erreur. Une autre technique couramment utilisée est l'analyse de silhouette (silhouette analysis), qui attribue un score basé sur le calcul de la distance intra-groupe par rapport à la distance inter-groupe.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          95
+        ],
+        [
+          "lecture1.pdf",
+          95
+        ],
+        [
+          "lecture1.pdf",
+          96
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          113
+        ],
+        [
+          "lecture1.pdf",
+          114
+        ],
+        [
+          "lecture1.pdf",
+          79
+        ],
+        [
+          "lecture1.pdf",
+          79
+        ],
+        [
+          "lecture1.pdf",
+          79
+        ],
+        [
+          "lecture1.pdf",
+          93
+        ],
+        [
+          "lecture1.pdf",
+          93
+        ],
+        [
+          "lecture1.pdf",
+          94
+        ],
+        [
+          "lecture1.pdf",
+          80
+        ],
+        [
+          "lecture1.pdf",
+          81
+        ],
+        [
+          "lecture1.pdf",
+          81
+        ]
+      ],
+      "reference_ranks": [
+        15,
+        15
+      ],
+      "retrieval_hit": true,
+      "citations": [
+        [
+          "lecture1.pdf",
+          81
+        ]
+      ],
+      "invalid_citations": 0,
+      "cited_reference_passages": 1,
+      "references_cited": [
+        true,
+        true
+      ],
+      "facts_matched": [
+        true,
+        true
+      ],
+      "facts_supported_by_citations": [
+        true,
+        true
+      ],
+      "correctness_auto": "correct",
+      "correctness": "correct",
+      "human": null,
+      "gold_support": "strong",
+      "gold_flags": [],
+      "outcome": "success"
+    },
+    {
+      "id": "u01",
+      "lang": "en",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "question": "What is the time complexity of training an SVM with the SMO algorithm?",
+      "status": "ok",
+      "abstained": true,
+      "abstain_reason": "le modèle juge que les passages ne contiennent pas la réponse",
+      "answer": "The provided documents do not contain information about the time complexity of training an SVM with the SMO algorithm.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          23
+        ],
+        [
+          "lecture1.pdf",
+          23
+        ],
+        [
+          "lecture1.pdf",
+          23
+        ],
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          2
+        ],
+        [
+          "lecture2.pdf",
+          2
+        ],
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture1.pdf",
+          16
+        ],
+        [
+          "lecture1.pdf",
+          16
+        ],
+        [
+          "lecture1.pdf",
+          16
+        ],
+        [
+          "lecture1.pdf",
+          45
+        ],
+        [
+          "lecture1.pdf",
+          45
+        ],
+        [
+          "lecture1.pdf",
+          46
+        ]
+      ],
+      "reference_ranks": [],
+      "retrieval_hit": false,
+      "citations": [],
+      "invalid_citations": 0,
+      "cited_reference_passages": 0,
+      "references_cited": [],
+      "outcome": "correct_abstention"
+    },
+    {
+      "id": "u02",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "question": "Comment la normalisation par lots (batch normalization) accélère-t-elle l'entraînement des réseaux profonds ?",
+      "status": "ok",
+      "abstained": true,
+      "abstain_reason": "le modèle juge que les passages ne contiennent pas la réponse",
+      "answer": "Les documents fournis ne contiennent pas d'information sur la normalisation par lots (batch normalization) ni sur la manière dont elle accélère l'entraînement des réseaux profonds.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          48
+        ],
+        [
+          "lecture1.pdf",
+          48
+        ],
+        [
+          "lecture1.pdf",
+          49
+        ],
+        [
+          "lecture1.pdf",
+          53
+        ],
+        [
+          "lecture1.pdf",
+          54
+        ],
+        [
+          "lecture1.pdf",
+          54
+        ],
+        [
+          "lecture1.pdf",
+          49
+        ],
+        [
+          "lecture1.pdf",
+          49
+        ],
+        [
+          "lecture1.pdf",
+          45
+        ],
+        [
+          "lecture1.pdf",
+          46
+        ],
+        [
+          "lecture1.pdf",
+          47
+        ],
+        [
+          "lecture1.pdf",
+          47
+        ],
+        [
+          "lecture1.pdf",
+          47
+        ]
+      ],
+      "reference_ranks": [],
+      "retrieval_hit": false,
+      "citations": [],
+      "invalid_citations": 0,
+      "cited_reference_passages": 0,
+      "references_cited": [],
+      "outcome": "correct_abstention"
+    },
+    {
+      "id": "u03",
+      "lang": "en",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "question": "How does AdaBoost reweight the training examples that were misclassified?",
+      "status": "ok",
+      "abstained": true,
+      "abstain_reason": "le modèle juge que les passages ne contiennent pas la réponse",
+      "answer": "The provided documents do not contain information about how AdaBoost reweights misclassified training examples.",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ],
+        [
+          "lecture1.pdf",
+          91
+        ]
+      ],
+      "reference_ranks": [],
+      "retrieval_hit": false,
+      "citations": [],
+      "invalid_citations": 0,
+      "cited_reference_passages": 0,
+      "references_cited": [],
+      "outcome": "correct_abstention"
+    },
+    {
+      "id": "u04",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "question": "Quelle valeur du paramètre C est recommandée par défaut pour un SVM ?",
+      "status": "ok",
+      "abstained": true,
+      "abstain_reason": "le modèle juge que les passages ne contiennent pas la réponse",
+      "answer": "Les documents fournis ne contiennent pas d'information sur une valeur recommandée par défaut pour le paramètre C d'un SVM.",
+      "retrieved": [
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          2
+        ],
+        [
+          "lecture2.pdf",
+          2
+        ],
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          1
+        ],
+        [
+          "lecture2.pdf",
+          3
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          4
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ],
+        [
+          "lecture2.pdf",
+          5
+        ]
+      ],
+      "reference_ranks": [],
+      "retrieval_hit": false,
+      "citations": [],
+      "invalid_citations": 0,
+      "cited_reference_passages": 0,
+      "references_cited": [],
+      "outcome": "correct_abstention"
+    },
+    {
+      "id": "u05",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "question": "Combien d'arbres faut-il utiliser dans une forêt aléatoire ?",
+      "status": "ok",
+      "abstained": true,
+      "abstain_reason": "le modèle juge que les passages ne contiennent pas la réponse",
+      "answer": "Les documents fournis ne contiennent pas d'information indiquant le nombre d'arbres qu'il faut utiliser dans une forêt aléatoire.",
+      "retrieved": [
+        [
+          "lecture1.pdf",
+          65
+        ],
+        [
+          "lecture1.pdf",
+          65
+        ],
+        [
+          "lecture1.pdf",
+          66
+        ],
+        [
+          "lecture1.pdf",
+          72
+        ],
+        [
+          "lecture1.pdf",
+          72
+        ],
+        [
+          "lecture1.pdf",
+          73
+        ],
+        [
+          "lecture1.pdf",
+          109
+        ],
+        [
+          "lecture1.pdf",
+          110
+        ],
+        [
+          "lecture1.pdf",
+          111
+        ],
+        [
+          "lecture1.pdf",
+          67
+        ],
+        [
+          "lecture1.pdf",
+          67
+        ],
+        [
+          "lecture1.pdf",
+          68
+        ],
+        [
+          "lecture1.pdf",
+          67
+        ]
+      ],
+      "reference_ranks": [],
+      "retrieval_hit": false,
+      "citations": [],
+      "invalid_citations": 0,
+      "cited_reference_passages": 0,
+      "references_cited": [],
+      "outcome": "correct_abstention"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "description": "Mini-corpus FR/EN pour un test de fumée de la recherche. Chaque question a exactement un passage pertinent (fichier + page). Les questions paraphrasent les passages pour limiter le recouvrement lexical ; 'langs' indique langue de la question -> langue du passage.",
+  "documents": [
+    {
+      "filename": "cours_ml_fr.pdf",
+      "pages": [
+        "La régression linéaire modélise une variable cible continue comme une combinaison linéaire des variables explicatives. Les coefficients sont estimés par la méthode des moindres carrés, qui minimise la somme des carrés des résidus.",
+        "Le surapprentissage survient lorsqu'un modèle mémorise le bruit des données d'entraînement au lieu de généraliser. La régularisation L2, l'arrêt précoce et la validation croisée permettent de le limiter.",
+        "L'algorithme des k-moyennes partitionne les observations en k groupes. À chaque itération, chaque point est affecté au centroïde le plus proche, puis les centroïdes sont recalculés comme la moyenne de leur groupe."
+      ]
+    },
+    {
+      "filename": "climate_report_en.pdf",
+      "pages": [
+        "Global sea levels rose by about 20 centimetres between 1901 and 2018, mainly because of the thermal expansion of seawater and the melting of glaciers and ice sheets.",
+        "Methane is a greenhouse gas with a warming potential more than 80 times higher than carbon dioxide over a 20-year period. Major sources include livestock, rice paddies and leaks from natural gas infrastructure.",
+        "Heat pumps transfer heat from the outside air or the ground into buildings. Because they move heat rather than generate it, they can deliver three to four units of heat per unit of electricity."
+      ]
+    },
+    {
+      "filename": "histoire_sciences_mixte.pdf",
+      "pages": [
+        "La Révolution française débute en 1789 avec la convocation des États généraux, puis la prise de la Bastille le 14 juillet.",
+        "The printing press, developed by Johannes Gutenberg around 1440, used movable metal type and made books far cheaper to produce.",
+        "Le canal de Suez, inauguré en 1869, relie la mer Méditerranée à la mer Rouge et raccourcit considérablement la route maritime entre l'Europe et l'Asie.",
+        "Photosynthesis converts light energy into chemical energy: plants use carbon dioxide and water to produce glucose, releasing oxygen as a by-product.",
+        "Le vaccin contre la variole, mis au point par Edward Jenner en 1796, reposait sur l'inoculation de la vaccine, une maladie bovine bénigne."
+      ]
+    }
+  ],
+  "queries": [
+    {"question": "Comment éviter qu'un modèle apprenne par cœur les particularités de son jeu d'entraînement ?", "langs": "fr->fr", "filename": "cours_ml_fr.pdf", "page": 2},
+    {"question": "Quelle technique permet d'obtenir les paramètres d'un modèle linéaire ?", "langs": "fr->fr", "filename": "cours_ml_fr.pdf", "page": 1},
+    {"question": "How does the k-means clustering algorithm update its cluster centers?", "langs": "en->fr", "filename": "cours_ml_fr.pdf", "page": 3},
+    {"question": "Why is the ocean getting higher?", "langs": "en->en", "filename": "climate_report_en.pdf", "page": 1},
+    {"question": "Pourquoi le méthane réchauffe-t-il davantage la planète que le CO2 ?", "langs": "fr->en", "filename": "climate_report_en.pdf", "page": 2},
+    {"question": "Quel rendement une pompe à chaleur offre-t-elle par rapport à l'électricité consommée ?", "langs": "fr->en", "filename": "climate_report_en.pdf", "page": 3},
+    {"question": "When did the storming of the Bastille take place?", "langs": "en->fr", "filename": "histoire_sciences_mixte.pdf", "page": 1},
+    {"question": "Qui a inventé l'imprimerie à caractères mobiles ?", "langs": "fr->en", "filename": "histoire_sciences_mixte.pdf", "page": 2},
+    {"question": "Which waterway links the Mediterranean with the Red Sea?", "langs": "en->fr", "filename": "histoire_sciences_mixte.pdf", "page": 3},
+    {"question": "Comment les végétaux fabriquent-ils du sucre à partir du soleil ?", "langs": "fr->en", "filename": "histoire_sciences_mixte.pdf", "page": 4},
+    {"question": "What are the main emitters of methane?", "langs": "en->en", "filename": "climate_report_en.pdf", "page": 2},
+    {"question": "Who created the first vaccine and how did it work?", "langs": "en->fr", "filename": "histoire_sciences_mixte.pdf", "page": 5}
+  ]
+}

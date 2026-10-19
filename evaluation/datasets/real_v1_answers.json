@@ -1,0 +1,107 @@
+{
+  "name": "real_v1_answers",
+  "dataset": "real_v1",
+  "dataset_sha256": "70dc9444ad5b4e4930e70bf63eecd07266bb8418fbc9cbd6e8bb1dbfc883f791",
+  "description": "Réponses attendues pour les 15 questions répondables de real_v1, rédigées à partir des passages de référence uniquement (avant toute évaluation de la génération). 'required_facts' : chaque élément est une liste de variantes acceptées (FR/EN, notations), comparées sans casse ni accents, en mots entiers ; un '*' final autorise un mot plus long commençant par la variante (ex. 'polynom*'). La correction automatique n'est qu'un indicateur approximatif (elle ne détecte ni les négations ni les erreurs de raisonnement), à confirmer par relecture humaine. 'support' = 'weak' signale un fait que les mots-clés ne peuvent pas vérifier complètement (voir 'flags'). Rédigé par l'assistant de développement ; révision 2 (2026-10-19) : correspondance en mots entiers, Q01/Q07/Q08/Q13/Q14 resserrés d'après les passages sources.",
+  "answers": {
+    "q01": {
+      "expected_answer": "Because the maximum-margin boundary is drawn as far from the training examples as possible, small perturbations (noise) of the inputs do not push examples across it; it is robust to noisy examples, though not to noisy labels.",
+      "required_facts": [
+        ["as far from", "far from the training", "far from the examples", "far from the data", "far away from", "loin des exemples", "loin des donnees", "loin des points", "le plus loin", "eloign*", "large margin", "wide margin", "grande marge", "marge large", "distance maximale", "maximum distance", "maximal distance"],
+        ["noisy", "noise", "bruit*", "perturbation*"]
+      ],
+      "support": "weak",
+      "flags": ["L'idée « frontière éloignée des exemples » reste formulable de nombreuses façons : une paraphrase non listée sera comptée comme absente (relecture). La variante isolée « far » a été retirée : elle correspondait aussi à « so far »."]
+    },
+    "q02": {
+      "expected_answer": "They are called support vectors.",
+      "required_facts": [["support vector*", "vecteurs de support", "vecteur de support", "vecteurs supports", "vecteur support"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q03": {
+      "expected_answer": "The leave-one-out error is bounded above by the number of support vectors divided by the number of training examples n: only support vectors can be misclassified when they are held out.",
+      "required_facts": [["support vector*", "vecteurs de support", "vecteur de support"]],
+      "support": "weak",
+      "flags": ["Le correcteur automatique vérifie seulement que la réponse mentionne les vecteurs de support ; il NE vérifie PAS la borne complète (nombre de vecteurs de support / n), dont la formule est en outre mal extraite du PDF (« # of support vectors leave-one-out CV error ≤ (7) n ») : à juger en relecture."]
+    },
+    "q04": {
+      "expected_answer": "If C is increased enough, all slack variables become zero and we recover the maximum-margin (hard-margin) linear separator, if the data are separable.",
+      "required_facts": [["maximum margin", "max-margin", "marge maximale", "marge maximum", "hard margin", "hard-margin", "marge dure", "marge rigide"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q05": {
+      "expected_answer": "By introducing slack variables that let margin constraints be violated, each violation being penalized (cost C times the slack) in the objective: a relaxed (soft-margin) formulation.",
+      "required_facts": [["slack", "variable d'ecart", "variables d'ecart", "variable de relachement", "variables de relachement", "relax*", "soft margin", "soft-margin", "marge souple"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q06": {
+      "expected_answer": "A quadratic programming problem: a quadratic objective in the parameters with linear constraints.",
+      "required_facts": [["quadratic program*", "programmation quadratique", "programme quadratique", "quadratic optimization", "optimisation quadratique"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q07": {
+      "expected_answer": "The regularization penalty pulls all the parameters towards zero (it shrinks them).",
+      "required_facts": [["towards zero", "toward zero", "towards 0", "toward 0", "close to zero", "near zero", "vers zero", "vers 0", "vers le zero", "proche de zero", "proches de zero", "pres de zero", "shrink*", "retreci*"]],
+      "support": "strong",
+      "flags": ["Le mot isolé « zero » n'est plus accepté : il correspondait aussi à « nonzero » ou à « mis exactement à zéro » (comportement du lasso, que le passage n'attribue qu'aux dimensions non informatives). Une négation (« ne pousse pas vers zéro ») n'est pas détectée."]
+    },
+    "q08": {
+      "expected_answer": "Estimating the coefficients requires inverting an n × n matrix (λI + K, where K is the Gram matrix of inner products between the n training examples); this is the cost of working with inner products instead of the feature vectors.",
+      "required_facts": [
+        ["invert*", "invers*"],
+        ["n × n", "n×n", "n x n", "nxn", "n by n", "n-by-n", "n*n", "n^2", "n²", "n par n", "gram", "kernel matrix", "matrice noyau", "matrice du noyau", "matrice des noyaux"]
+      ],
+      "support": "strong",
+      "flags": ["La matrice inversée est λI + K ; « inverser la matrice de Gram (n × n) » est accepté comme équivalent. Une taille décrite autrement (ex. « matrice carrée de la taille du jeu d'entraînement ») ne sera pas reconnue."]
+    },
+    "q09": {
+      "expected_answer": "Standard examples are polynomial kernels and radial basis (Gaussian, RBF) kernels; lecture 1 also mentions sequence/string kernels and graph kernels.",
+      "required_facts": [["polynom*"], ["gauss*", "radial", "rbf"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q10": {
+      "expected_answer": "Each training example is held out in turn: the model is trained on all the remaining examples, tested on the held-out one, and the errors are counted (averaged) over all examples. It is k-fold cross-validation with k = n.",
+      "required_facts": [
+        ["remaining", "rest of", "the rest", "all other*", "the others", "other examples", "restant*", "autres exemples", "tous les autres", "all but", "n-1", "n − 1", "n - 1"],
+        ["test*", "evaluat*", "evalu*", "error*", "erreur*"]
+      ],
+      "support": "weak",
+      "flags": ["Le correcteur automatique NE vérifie PAS la procédure complète : ses mots-clés génériques (« remaining », « test ») peuvent figurer dans une réponse incomplète. La relecture doit vérifier les trois étapes : retirer un exemple, entraîner sur le reste, tester sur l'exemple retiré (et répéter pour chacun)."]
+    },
+    "q11": {
+      "expected_answer": "Ridge regression adds a penalty λw² proportional to the squared Euclidean (L2) norm of the weights.",
+      "required_facts": [["l2", "euclid*", "w2", "squared", "carre*", "norme 2", "w^2", "w⊤w"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q12": {
+      "expected_answer": "Lasso (L1 penalty) can set some coefficients exactly to zero, so it performs feature selection: the corresponding features can be discarded.",
+      "required_facts": [["lasso", "l1"], ["select*", "discard*", "elimin*", "supprim*", "ecart*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q13": {
+      "expected_answer": "About 63.2% of the samples in a bootstrap sample are unique (the others are duplicates).",
+      "required_facts": [["63.2", "63,2", "63 %", "63%", "environ 63", "about 63", "approximately 63", "roughly 63", "around 63", "pres de 63", "≈ 63", "~63", "~ 63"]],
+      "support": "strong",
+      "flags": ["Les arrondis « environ 63 % » sont acceptés (le passage donne ≈ 63,2 %). « Deux tiers » ou « 1 − 1/e » ne sont pas acceptés : le premier est inexact, le second ne figure pas dans le passage (relecture)."]
+    },
+    "q14": {
+      "expected_answer": "The course's example fits the model on 60% of the training set and uses the remaining 40% as a validation set.",
+      "required_facts": [["60%", "60 %", "60 percent", "60 per cent", "60 pour cent"], ["40%", "40 %", "40 percent", "40 per cent", "40 pour cent"]],
+      "support": "strong",
+      "flags": ["Référence vérifiée : l'exemple 60 % / 40 % figure entièrement en page 38. La page 39 ne le prolonge pas : elle s'ouvre sur une question rhétorique (« 60%? More, less? ») puis présente un autre exemple (validation croisée à 5 plis, 80 / 20). Une citation de la page 39 compte donc à juste titre comme hors référence. Les faits exigent un pourcentage pour ne pas accepter « instances 21 à 40 »."]
+    },
+    "q15": {
+      "expected_answer": "Increase k gradually and look for a sudden drop in the error (an 'elbow' in the plot of k versus error); silhouette analysis, which scores clusterings between -1 and +1, is another common technique.",
+      "required_facts": [["elbow", "coude"], ["silhouette*"]],
+      "support": "strong",
+      "flags": []
+    }
+  }
+}

@@ -1,0 +1,46 @@
+# Environnements virtuels
+.venv/
+venv/
+
+# Bytecode et builds Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Outils
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Secrets : seul .env.example est versionné
+.env
+.env.*
+!.env.example
+
+# Données locales (PDF importés, base Chroma) : jamais versionnées
+data/*
+!data/.gitkeep
+
+# Modèles téléchargés localement
+models/
+*.gguf
+*.safetensors
+
+# Documents réels utilisés pour l'évaluation (potentiellement personnels ou confidentiels)
+evaluation/documents/
+
+# Résultats d'évaluation bruts volumineux (les synthèses restent versionnées)
+evaluation/results/*.jsonl
+evaluation/results/**/*.jsonl
+
+# IDE et système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
