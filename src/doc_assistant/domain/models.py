@@ -88,6 +88,20 @@ class Chunk:
 
 
 @dataclass(frozen=True, slots=True)
+class IndexedDocument:
+    """Document présent dans l'index, reconstitué à partir des métadonnées de ses chunks.
+
+    ``last_page`` est la dernière page ayant produit un chunk (les pages sans texte n'en
+    produisent pas : c'est une borne inférieure du nombre de pages du PDF).
+    """
+
+    doc_id: str
+    filename: str
+    chunk_count: int
+    last_page: int
+
+
+@dataclass(frozen=True, slots=True)
 class SearchResult:
     """Chunk retrouvé et sa similarité cosinus avec la question (entre -1 et 1)."""
 

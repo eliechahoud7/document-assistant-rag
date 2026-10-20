@@ -1,0 +1,2632 @@
+{
+  "generated_at": "2026-10-20T12:14:21+00:00",
+  "dataset": {
+    "name": "real_v2",
+    "kind": "real",
+    "sha256": "75abb1ee0ba8cbc20a209f190228c9002b557f15932f2ac967de2fb5e4e79a08",
+    "documents": 3,
+    "questions": 47,
+    "answerable": 38,
+    "unanswerable": 9
+  },
+  "config": {
+    "embedding_model": "intfloat/multilingual-e5-small",
+    "embedding_model_revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "chunk_size": 800,
+    "chunk_overlap": 100,
+    "query_translation": "fr-en",
+    "translation_model": "Helsinki-NLP/opus-mt-fr-en",
+    "translation_model_revision": "c4aed37b318c763fd177aa449b44e3b783cc6c02",
+    "top_k": 5,
+    "min_overlap": 0.5,
+    "chunk_count": 370,
+    "fusion": "reciprocal_rank_fusion",
+    "rrf_k": 60,
+    "fusion_inputs": [
+      "original_query",
+      "translated_query (questions françaises seulement)"
+    ],
+    "absence_score": "cosinus maximal du passage en tête (requête d'origine ou traduite)"
+  },
+  "environment": {
+    "python": "3.13.5",
+    "pypdf": "6.21.1",
+    "langchain-text-splitters": "1.1.3",
+    "chromadb": "1.5.9",
+    "sentence-transformers": "6.1.0",
+    "torch": "2.14.1"
+  },
+  "retrieval": {
+    "overall": {
+      "n": 38,
+      "recall@1": 0.364035,
+      "recall@3": 0.631579,
+      "recall@5": 0.802632,
+      "hit@1": 0.473684,
+      "hit@3": 0.763158,
+      "hit@5": 0.894737,
+      "mrr": 0.641228
+    },
+    "by_category": {
+      "cross_lingual": {
+        "n": 4,
+        "recall@1": 0.375,
+        "recall@3": 0.625,
+        "recall@5": 0.875,
+        "hit@1": 0.5,
+        "hit@3": 0.75,
+        "hit@5": 1.0,
+        "mrr": 0.645833
+      },
+      "fine_grained": {
+        "n": 4,
+        "recall@1": 0.333333,
+        "recall@3": 0.416667,
+        "recall@5": 0.416667,
+        "hit@1": 0.5,
+        "hit@3": 0.5,
+        "hit@5": 0.5,
+        "mrr": 0.5
+      },
+      "multi_fact": {
+        "n": 3,
+        "recall@1": 0.0,
+        "recall@3": 0.333333,
+        "recall@5": 0.666667,
+        "hit@1": 0.0,
+        "hit@3": 0.333333,
+        "hit@5": 0.666667,
+        "mrr": 0.233333
+      },
+      "multi_part_answerable": {
+        "n": 7,
+        "recall@1": 0.190476,
+        "recall@3": 0.595238,
+        "recall@5": 0.738095,
+        "hit@1": 0.428571,
+        "hit@3": 0.857143,
+        "hit@5": 0.857143,
+        "mrr": 0.619048
+      },
+      "multi_part_partial": {
+        "n": 7,
+        "recall@1": 0.571429,
+        "recall@3": 0.714286,
+        "recall@5": 1.0,
+        "hit@1": 0.571429,
+        "hit@3": 0.714286,
+        "hit@5": 1.0,
+        "mrr": 0.714286
+      },
+      "multi_passage": {
+        "n": 5,
+        "recall@1": 0.333333,
+        "recall@3": 0.533333,
+        "recall@5": 0.633333,
+        "hit@1": 0.6,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "mrr": 0.8
+      },
+      "numeric": {
+        "n": 3,
+        "recall@1": 0.666667,
+        "recall@3": 0.666667,
+        "recall@5": 1.0,
+        "hit@1": 0.666667,
+        "hit@3": 0.666667,
+        "hit@5": 1.0,
+        "mrr": 0.75
+      },
+      "paraphrase": {
+        "n": 5,
+        "recall@1": 0.4,
+        "recall@3": 1.0,
+        "recall@5": 1.0,
+        "hit@1": 0.4,
+        "hit@3": 1.0,
+        "hit@5": 1.0,
+        "mrr": 0.7
+      }
+    },
+    "by_language_pair": {
+      "en->en": {
+        "n": 20,
+        "recall@1": 0.466667,
+        "recall@3": 0.683333,
+        "recall@5": 0.858333,
+        "hit@1": 0.6,
+        "hit@3": 0.8,
+        "hit@5": 0.95,
+        "mrr": 0.726667
+      },
+      "fr->en": {
+        "n": 18,
+        "recall@1": 0.25,
+        "recall@3": 0.574074,
+        "recall@5": 0.740741,
+        "hit@1": 0.333333,
+        "hit@3": 0.722222,
+        "hit@5": 0.833333,
+        "mrr": 0.546296
+      }
+    }
+  },
+  "absence_detection": {
+    "signal": "score cosinus du meilleur passage (plus élevé = plus probablement répondable)",
+    "auroc": 0.94152,
+    "answerable_top1": {
+      "n": 38,
+      "mean": 0.867053,
+      "median": 0.869024,
+      "min": 0.822396,
+      "max": 0.919962
+    },
+    "unanswerable_top1": {
+      "n": 9,
+      "mean": 0.822252,
+      "median": 0.81958,
+      "min": 0.788703,
+      "max": 0.848294
+    },
+    "separable": false,
+    "answerable_at_or_below_max_unanswerable": 6,
+    "unanswerable_at_or_above_min_answerable": 4
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "lang": "en",
+      "category": "numeric",
+      "answerable": true,
+      "reference_ranks": [
+        4
+      ],
+      "first_relevant_rank": 4,
+      "top1_score": 0.879889,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 68,
+          "chunk_index": 205,
+          "score": 0.879889
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 68,
+          "chunk_index": 206,
+          "score": 0.867022
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 204,
+          "score": 0.84963
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 69,
+          "chunk_index": 207,
+          "score": 0.848898
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 203,
+          "score": 0.841422
+        }
+      ]
+    },
+    {
+      "id": "q02",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.892793,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 70,
+          "chunk_index": 211,
+          "score": 0.892793
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 203,
+          "score": 0.880882
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 70,
+          "chunk_index": 212,
+          "score": 0.853899
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 71,
+          "chunk_index": 214,
+          "score": 0.847982
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 69,
+          "chunk_index": 208,
+          "score": 0.852569
+        }
+      ]
+    },
+    {
+      "id": "q03",
+      "lang": "en",
+      "category": "paraphrase",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.919962,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 71,
+          "chunk_index": 216,
+          "score": 0.919962
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 65,
+          "chunk_index": 197,
+          "score": 0.907432
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 203,
+          "score": 0.86664
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 71,
+          "chunk_index": 215,
+          "score": 0.866552
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 65,
+          "chunk_index": 196,
+          "score": 0.860054
+        }
+      ]
+    },
+    {
+      "id": "q04",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "reference_ranks": [
+        null,
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.864209,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 76,
+          "chunk_index": 230,
+          "score": 0.864209
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 76,
+          "chunk_index": 231,
+          "score": 0.852656
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 112,
+          "chunk_index": 312,
+          "score": 0.831211
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 83,
+          "chunk_index": 253,
+          "score": 0.822831
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 113,
+          "chunk_index": 315,
+          "score": 0.817166
+        }
+      ]
+    },
+    {
+      "id": "q05",
+      "lang": "en",
+      "category": "paraphrase",
+      "answerable": true,
+      "reference_ranks": [
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.856232,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 73,
+          "chunk_index": 221,
+          "score": 0.856232
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 77,
+          "chunk_index": 234,
+          "score": 0.844966
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 74,
+          "chunk_index": 222,
+          "score": 0.836639
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 77,
+          "chunk_index": 235,
+          "score": 0.825048
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 7,
+          "chunk_index": 23,
+          "score": 0.8145
+        }
+      ]
+    },
+    {
+      "id": "q06",
+      "lang": "fr",
+      "category": "fine_grained",
+      "answerable": true,
+      "reference_ranks": [
+        null
+      ],
+      "first_relevant_rank": null,
+      "top1_score": 0.849608,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 76,
+          "chunk_index": 231,
+          "score": 0.849608
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 76,
+          "chunk_index": 230,
+          "score": 0.844828
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 53,
+          "chunk_index": 170,
+          "score": 0.828835
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 30,
+          "chunk_index": 102,
+          "score": 0.827029
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 6,
+          "chunk_index": 16,
+          "score": 0.826311
+        }
+      ]
+    },
+    {
+      "id": "q07",
+      "lang": "en",
+      "category": "paraphrase",
+      "answerable": true,
+      "reference_ranks": [
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.856105,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 241,
+          "score": 0.856105
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 243,
+          "score": 0.854523
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 249,
+          "score": 0.843541
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 8,
+          "chunk_index": 23,
+          "score": 0.840877
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 244,
+          "score": 0.838697
+        }
+      ]
+    },
+    {
+      "id": "q08",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "reference_ranks": [
+        4
+      ],
+      "first_relevant_rank": 4,
+      "top1_score": 0.830353,
+      "retrieved": [
+        {
+          "filename": "lecture3.pdf",
+          "page": 8,
+          "chunk_index": 23,
+          "score": 0.830353
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 249,
+          "score": 0.84094
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 79,
+          "chunk_index": 240,
+          "score": 0.823701
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 243,
+          "score": 0.835432
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 23,
+          "chunk_index": 79,
+          "score": 0.823498
+        }
+      ]
+    },
+    {
+      "id": "q09",
+      "lang": "en",
+      "category": "fine_grained",
+      "answerable": true,
+      "reference_ranks": [
+        null,
+        1,
+        3
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.867468,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 88,
+          "chunk_index": 265,
+          "score": 0.867468
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 91,
+          "chunk_index": 271,
+          "score": 0.860928
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 91,
+          "chunk_index": 272,
+          "score": 0.852898
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 90,
+          "chunk_index": 269,
+          "score": 0.849099
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 21,
+          "chunk_index": 70,
+          "score": 0.845963
+        }
+      ]
+    },
+    {
+      "id": "q10",
+      "lang": "fr",
+      "category": "numeric",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.831155,
+      "retrieved": [
+        {
+          "filename": "lecture3.pdf",
+          "page": 5,
+          "chunk_index": 15,
+          "score": 0.831155
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 109,
+          "chunk_index": 305,
+          "score": 0.81222
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 30,
+          "chunk_index": 102,
+          "score": 0.809354
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 61,
+          "chunk_index": 189,
+          "score": 0.807183
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 63,
+          "chunk_index": 193,
+          "score": 0.808908
+        }
+      ]
+    },
+    {
+      "id": "q11",
+      "lang": "en",
+      "category": "paraphrase",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.87824,
+      "retrieved": [
+        {
+          "filename": "lecture3.pdf",
+          "page": 6,
+          "chunk_index": 16,
+          "score": 0.87824
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 5,
+          "chunk_index": 14,
+          "score": 0.845975
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 1,
+          "chunk_index": 0,
+          "score": 0.830051
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 2,
+          "chunk_index": 4,
+          "score": 0.827916
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 5,
+          "chunk_index": 13,
+          "score": 0.825736
+        }
+      ]
+    },
+    {
+      "id": "q12",
+      "lang": "fr",
+      "category": "cross_lingual",
+      "answerable": true,
+      "reference_ranks": [
+        3
+      ],
+      "first_relevant_rank": 3,
+      "top1_score": 0.880788,
+      "retrieved": [
+        {
+          "filename": "lecture2.pdf",
+          "page": 4,
+          "chunk_index": 12,
+          "score": 0.880788
+        },
+        {
+          "filename": "lecture2.pdf",
+          "page": 5,
+          "chunk_index": 14,
+          "score": 0.881286
+        },
+        {
+          "filename": "lecture2.pdf",
+          "page": 1,
+          "chunk_index": 1,
+          "score": 0.872562
+        },
+        {
+          "filename": "lecture2.pdf",
+          "page": 4,
+          "chunk_index": 10,
+          "score": 0.876338
+        },
+        {
+          "filename": "lecture2.pdf",
+          "page": 5,
+          "chunk_index": 16,
+          "score": 0.874905
+        }
+      ]
+    },
+    {
+      "id": "q13",
+      "lang": "en",
+      "category": "fine_grained",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.869126,
+      "retrieved": [
+        {
+          "filename": "lecture3.pdf",
+          "page": 6,
+          "chunk_index": 17,
+          "score": 0.869126
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 1,
+          "chunk_index": 0,
+          "score": 0.864985
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 1,
+          "chunk_index": 1,
+          "score": 0.85316
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 111,
+          "chunk_index": 308,
+          "score": 0.847289
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 2,
+          "chunk_index": 4,
+          "score": 0.842422
+        }
+      ]
+    },
+    {
+      "id": "q14",
+      "lang": "fr",
+      "category": "paraphrase",
+      "answerable": true,
+      "reference_ranks": [
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.875697,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 60,
+          "chunk_index": 187,
+          "score": 0.875697
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 60,
+          "chunk_index": 185,
+          "score": 0.861822
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 57,
+          "chunk_index": 178,
+          "score": 0.840235
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 57,
+          "chunk_index": 179,
+          "score": 0.853545
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 64,
+          "chunk_index": 195,
+          "score": 0.8314
+        }
+      ]
+    },
+    {
+      "id": "q15",
+      "lang": "en",
+      "category": "numeric",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.889451,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 69,
+          "chunk_index": 209,
+          "score": 0.889451
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 203,
+          "score": 0.856591
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 72,
+          "chunk_index": 217,
+          "score": 0.847188
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 6,
+          "chunk_index": 16,
+          "score": 0.843744
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 65,
+          "chunk_index": 196,
+          "score": 0.842826
+        }
+      ]
+    },
+    {
+      "id": "q16",
+      "lang": "fr",
+      "category": "fine_grained",
+      "answerable": true,
+      "reference_ranks": [
+        null
+      ],
+      "first_relevant_rank": null,
+      "top1_score": 0.822396,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 12,
+          "chunk_index": 37,
+          "score": 0.822396
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 75,
+          "chunk_index": 228,
+          "score": 0.813593
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 36,
+          "chunk_index": 123,
+          "score": 0.815833
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 3,
+          "chunk_index": 9,
+          "score": 0.820408
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 107,
+          "chunk_index": 302,
+          "score": 0.826689
+        }
+      ]
+    },
+    {
+      "id": "q17",
+      "lang": "en",
+      "category": "multi_part_answerable",
+      "answerable": true,
+      "reference_ranks": [
+        3,
+        4
+      ],
+      "first_relevant_rank": 3,
+      "top1_score": 0.880839,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 203,
+          "score": 0.880839
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 69,
+          "chunk_index": 208,
+          "score": 0.865063
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 70,
+          "chunk_index": 212,
+          "score": 0.856528
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 69,
+          "chunk_index": 207,
+          "score": 0.854246
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 204,
+          "score": 0.851075
+        }
+      ]
+    },
+    {
+      "id": "q18",
+      "lang": "fr",
+      "category": "multi_part_answerable",
+      "answerable": true,
+      "reference_ranks": [
+        null,
+        null
+      ],
+      "first_relevant_rank": null,
+      "top1_score": 0.83504,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 79,
+          "chunk_index": 240,
+          "score": 0.83504
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 79,
+          "chunk_index": 239,
+          "score": 0.817356
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 251,
+          "score": 0.817927
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 250,
+          "score": 0.822842
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 248,
+          "score": 0.825956
+        }
+      ]
+    },
+    {
+      "id": "q19",
+      "lang": "en",
+      "category": "multi_part_answerable",
+      "answerable": true,
+      "reference_ranks": [
+        2,
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.850994,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 249,
+          "score": 0.850994
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 243,
+          "score": 0.842943
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 95,
+          "chunk_index": 282,
+          "score": 0.839144
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 245,
+          "score": 0.837958
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 4,
+          "chunk_index": 10,
+          "score": 0.837556
+        }
+      ]
+    },
+    {
+      "id": "q20",
+      "lang": "fr",
+      "category": "multi_part_answerable",
+      "answerable": true,
+      "reference_ranks": [
+        3,
+        null,
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.902985,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 95,
+          "chunk_index": 282,
+          "score": 0.902985
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 94,
+          "chunk_index": 280,
+          "score": 0.884437
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 94,
+          "chunk_index": 278,
+          "score": 0.883923
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 242,
+          "score": 0.878715
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 245,
+          "score": 0.879977
+        }
+      ]
+    },
+    {
+      "id": "q21",
+      "lang": "en",
+      "category": "multi_part_answerable",
+      "answerable": true,
+      "reference_ranks": [
+        2,
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.889891,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 51,
+          "chunk_index": 164,
+          "score": 0.889891
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 51,
+          "chunk_index": 163,
+          "score": 0.883152
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 17,
+          "chunk_index": 59,
+          "score": 0.864154
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 48,
+          "chunk_index": 155,
+          "score": 0.863064
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 23,
+          "chunk_index": 80,
+          "score": 0.862135
+        }
+      ]
+    },
+    {
+      "id": "q22",
+      "lang": "fr",
+      "category": "multi_part_answerable",
+      "answerable": true,
+      "reference_ranks": [
+        4,
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.876422,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 72,
+          "chunk_index": 217,
+          "score": 0.876422
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 71,
+          "chunk_index": 216,
+          "score": 0.85392
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 65,
+          "chunk_index": 197,
+          "score": 0.869759
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 72,
+          "chunk_index": 218,
+          "score": 0.867364
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 65,
+          "chunk_index": 198,
+          "score": 0.850959
+        }
+      ]
+    },
+    {
+      "id": "q23",
+      "lang": "en",
+      "category": "multi_part_answerable",
+      "answerable": true,
+      "reference_ranks": [
+        1,
+        null
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.864387,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 23,
+          "chunk_index": 77,
+          "score": 0.864387
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 22,
+          "chunk_index": 75,
+          "score": 0.863286
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 13,
+          "chunk_index": 39,
+          "score": 0.857604
+        },
+        {
+          "filename": "lecture2.pdf",
+          "page": 3,
+          "chunk_index": 8,
+          "score": 0.856202
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 113,
+          "chunk_index": 315,
+          "score": 0.854245
+        }
+      ]
+    },
+    {
+      "id": "q24",
+      "lang": "en",
+      "category": "multi_fact",
+      "answerable": true,
+      "reference_ranks": [
+        null,
+        null
+      ],
+      "first_relevant_rank": null,
+      "top1_score": 0.859266,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 21,
+          "chunk_index": 68,
+          "score": 0.859266
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 18,
+          "chunk_index": 60,
+          "score": 0.855041
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 17,
+          "chunk_index": 57,
+          "score": 0.849813
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 39,
+          "chunk_index": 138,
+          "score": 0.84356
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 19,
+          "chunk_index": 63,
+          "score": 0.842503
+        }
+      ]
+    },
+    {
+      "id": "q25",
+      "lang": "fr",
+      "category": "multi_fact",
+      "answerable": true,
+      "reference_ranks": [
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.8634,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 89,
+          "chunk_index": 266,
+          "score": 0.8634
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 89,
+          "chunk_index": 267,
+          "score": 0.848184
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 85,
+          "chunk_index": 257,
+          "score": 0.832811
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 94,
+          "chunk_index": 278,
+          "score": 0.843613
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 91,
+          "chunk_index": 270,
+          "score": 0.859673
+        }
+      ]
+    },
+    {
+      "id": "q26",
+      "lang": "en",
+      "category": "multi_fact",
+      "answerable": true,
+      "reference_ranks": [
+        5
+      ],
+      "first_relevant_rank": 5,
+      "top1_score": 0.877429,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 247,
+          "score": 0.877429
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 95,
+          "chunk_index": 282,
+          "score": 0.869664
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 85,
+          "chunk_index": 257,
+          "score": 0.852119
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 245,
+          "score": 0.851844
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 95,
+          "chunk_index": 281,
+          "score": 0.846964
+        }
+      ]
+    },
+    {
+      "id": "q27",
+      "lang": "fr",
+      "category": "multi_passage",
+      "answerable": true,
+      "reference_ranks": [
+        1,
+        1,
+        null
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.868923,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 59,
+          "chunk_index": 184,
+          "score": 0.868923
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 62,
+          "chunk_index": 192,
+          "score": 0.839587
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 59,
+          "chunk_index": 183,
+          "score": 0.852743
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 73,
+          "chunk_index": 221,
+          "score": 0.832997
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 61,
+          "chunk_index": 190,
+          "score": 0.838085
+        }
+      ]
+    },
+    {
+      "id": "q28",
+      "lang": "en",
+      "category": "multi_passage",
+      "answerable": true,
+      "reference_ranks": [
+        null,
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.878858,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 247,
+          "score": 0.878858
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 79,
+          "chunk_index": 239,
+          "score": 0.87153
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 246,
+          "score": 0.865322
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 249,
+          "score": 0.862918
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 95,
+          "chunk_index": 282,
+          "score": 0.857837
+        }
+      ]
+    },
+    {
+      "id": "q29",
+      "lang": "fr",
+      "category": "multi_passage",
+      "answerable": true,
+      "reference_ranks": [
+        5,
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.878604,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 79,
+          "chunk_index": 239,
+          "score": 0.878604
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 95,
+          "chunk_index": 282,
+          "score": 0.850192
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 247,
+          "score": 0.862451
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 84,
+          "chunk_index": 255,
+          "score": 0.856824
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 249,
+          "score": 0.847644
+        }
+      ]
+    },
+    {
+      "id": "q30",
+      "lang": "en",
+      "category": "multi_passage",
+      "answerable": true,
+      "reference_ranks": [
+        null,
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.867773,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 92,
+          "chunk_index": 274,
+          "score": 0.867773
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 90,
+          "chunk_index": 269,
+          "score": 0.866627
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 39,
+          "chunk_index": 138,
+          "score": 0.864545
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 91,
+          "chunk_index": 272,
+          "score": 0.861592
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 93,
+          "chunk_index": 276,
+          "score": 0.860633
+        }
+      ]
+    },
+    {
+      "id": "q31",
+      "lang": "fr",
+      "category": "multi_passage",
+      "answerable": true,
+      "reference_ranks": [
+        2,
+        null
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.883943,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 39,
+          "chunk_index": 138,
+          "score": 0.883943
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 21,
+          "chunk_index": 70,
+          "score": 0.855231
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 27,
+          "chunk_index": 90,
+          "score": 0.848433
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 94,
+          "chunk_index": 280,
+          "score": 0.843193
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 31,
+          "chunk_index": 104,
+          "score": 0.868389
+        }
+      ]
+    },
+    {
+      "id": "q32",
+      "lang": "en",
+      "category": "multi_part_partial",
+      "answerable": true,
+      "reference_ranks": [
+        4
+      ],
+      "first_relevant_rank": 4,
+      "top1_score": 0.880079,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 65,
+          "chunk_index": 198,
+          "score": 0.880079
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 65,
+          "chunk_index": 197,
+          "score": 0.861169
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 71,
+          "chunk_index": 216,
+          "score": 0.859689
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 72,
+          "chunk_index": 218,
+          "score": 0.858891
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 36,
+          "chunk_index": 122,
+          "score": 0.847244
+        }
+      ]
+    },
+    {
+      "id": "q33",
+      "lang": "fr",
+      "category": "multi_part_partial",
+      "answerable": true,
+      "reference_ranks": [
+        3,
+        2
+      ],
+      "first_relevant_rank": 2,
+      "top1_score": 0.827087,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 77,
+          "chunk_index": 236,
+          "score": 0.827087
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 77,
+          "chunk_index": 235,
+          "score": 0.838574
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 77,
+          "chunk_index": 234,
+          "score": 0.831167
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 117,
+          "chunk_index": 325,
+          "score": 0.812642
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 117,
+          "chunk_index": 326,
+          "score": 0.811301
+        }
+      ]
+    },
+    {
+      "id": "q34",
+      "lang": "en",
+      "category": "multi_part_partial",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.845192,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 70,
+          "chunk_index": 212,
+          "score": 0.845192
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 85,
+          "chunk_index": 256,
+          "score": 0.833664
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 93,
+          "chunk_index": 275,
+          "score": 0.823111
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 15,
+          "chunk_index": 48,
+          "score": 0.814282
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 92,
+          "chunk_index": 274,
+          "score": 0.814148
+        }
+      ]
+    },
+    {
+      "id": "q35",
+      "lang": "fr",
+      "category": "multi_part_partial",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.877182,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 242,
+          "score": 0.877182
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 8,
+          "chunk_index": 23,
+          "score": 0.848417
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 3,
+          "chunk_index": 9,
+          "score": 0.841148
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 94,
+          "chunk_index": 280,
+          "score": 0.836128
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 249,
+          "score": 0.853599
+        }
+      ]
+    },
+    {
+      "id": "q36",
+      "lang": "en",
+      "category": "multi_part_partial",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.871465,
+      "retrieved": [
+        {
+          "filename": "lecture3.pdf",
+          "page": 6,
+          "chunk_index": 16,
+          "score": 0.871465
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 5,
+          "chunk_index": 14,
+          "score": 0.850743
+        },
+        {
+          "filename": "lecture3.pdf",
+          "page": 5,
+          "chunk_index": 13,
+          "score": 0.845447
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 113,
+          "chunk_index": 316,
+          "score": 0.835529
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 39,
+          "chunk_index": 135,
+          "score": 0.832711
+        }
+      ]
+    },
+    {
+      "id": "q37",
+      "lang": "fr",
+      "category": "multi_part_partial",
+      "answerable": true,
+      "reference_ranks": [
+        4
+      ],
+      "first_relevant_rank": 4,
+      "top1_score": 0.853364,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 60,
+          "chunk_index": 187,
+          "score": 0.853364
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 57,
+          "chunk_index": 178,
+          "score": 0.857549
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 64,
+          "chunk_index": 195,
+          "score": 0.847589
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 60,
+          "chunk_index": 185,
+          "score": 0.844301
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 62,
+          "chunk_index": 192,
+          "score": 0.844416
+        }
+      ]
+    },
+    {
+      "id": "q38",
+      "lang": "en",
+      "category": "multi_part_partial",
+      "answerable": true,
+      "reference_ranks": [
+        1
+      ],
+      "first_relevant_rank": 1,
+      "top1_score": 0.851404,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 88,
+          "chunk_index": 265,
+          "score": 0.851404
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 90,
+          "chunk_index": 269,
+          "score": 0.842553
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 92,
+          "chunk_index": 274,
+          "score": 0.841127
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 91,
+          "chunk_index": 272,
+          "score": 0.839211
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 2,
+          "chunk_index": 6,
+          "score": 0.839043
+        }
+      ]
+    },
+    {
+      "id": "u01",
+      "lang": "en",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.81958,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 6,
+          "chunk_index": 18,
+          "score": 0.81958
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 57,
+          "chunk_index": 178,
+          "score": 0.818049
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 1,
+          "chunk_index": 0,
+          "score": 0.817217
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 117,
+          "chunk_index": 325,
+          "score": 0.816951
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 57,
+          "chunk_index": 179,
+          "score": 0.81471
+        }
+      ]
+    },
+    {
+      "id": "u02",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.848294,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 203,
+          "score": 0.848294
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 71,
+          "chunk_index": 216,
+          "score": 0.842083
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 72,
+          "chunk_index": 217,
+          "score": 0.831303
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 67,
+          "chunk_index": 204,
+          "score": 0.81844
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 68,
+          "chunk_index": 205,
+          "score": 0.819997
+        }
+      ]
+    },
+    {
+      "id": "u03",
+      "lang": "en",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.841179,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 52,
+          "chunk_index": 166,
+          "score": 0.841179
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 50,
+          "chunk_index": 159,
+          "score": 0.838997
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 55,
+          "chunk_index": 174,
+          "score": 0.83678
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 50,
+          "chunk_index": 160,
+          "score": 0.835553
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 31,
+          "chunk_index": 103,
+          "score": 0.833786
+        }
+      ]
+    },
+    {
+      "id": "u04",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.834675,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 95,
+          "chunk_index": 282,
+          "score": 0.834675
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 80,
+          "chunk_index": 241,
+          "score": 0.839939
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 81,
+          "chunk_index": 246,
+          "score": 0.838731
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 82,
+          "chunk_index": 251,
+          "score": 0.830362
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 83,
+          "chunk_index": 254,
+          "score": 0.836592
+        }
+      ]
+    },
+    {
+      "id": "u05",
+      "lang": "en",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.801485,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 38,
+          "chunk_index": 130,
+          "score": 0.801485
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 44,
+          "chunk_index": 144,
+          "score": 0.799185
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 36,
+          "chunk_index": 120,
+          "score": 0.797509
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 24,
+          "chunk_index": 82,
+          "score": 0.797308
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 85,
+          "chunk_index": 257,
+          "score": 0.796637
+        }
+      ]
+    },
+    {
+      "id": "u06",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.810336,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 73,
+          "chunk_index": 221,
+          "score": 0.810336
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 74,
+          "chunk_index": 222,
+          "score": 0.815582
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 117,
+          "chunk_index": 326,
+          "score": 0.788792
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 21,
+          "chunk_index": 69,
+          "score": 0.784775
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 76,
+          "chunk_index": 230,
+          "score": 0.788413
+        }
+      ]
+    },
+    {
+      "id": "u07",
+      "lang": "en",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.844643,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 74,
+          "chunk_index": 222,
+          "score": 0.844643
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 76,
+          "chunk_index": 230,
+          "score": 0.840515
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 7,
+          "chunk_index": 23,
+          "score": 0.838259
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 74,
+          "chunk_index": 224,
+          "score": 0.837828
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 75,
+          "chunk_index": 227,
+          "score": 0.836131
+        }
+      ]
+    },
+    {
+      "id": "u08",
+      "lang": "fr",
+      "category": "unanswerable_on_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.811373,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 27,
+          "chunk_index": 90,
+          "score": 0.811373
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 62,
+          "chunk_index": 192,
+          "score": 0.80427
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 15,
+          "chunk_index": 48,
+          "score": 0.805213
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 117,
+          "chunk_index": 325,
+          "score": 0.80365
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 34,
+          "chunk_index": 115,
+          "score": 0.804174
+        }
+      ]
+    },
+    {
+      "id": "u09",
+      "lang": "en",
+      "category": "unanswerable_off_topic",
+      "answerable": false,
+      "reference_ranks": [],
+      "first_relevant_rank": null,
+      "top1_score": 0.788703,
+      "retrieved": [
+        {
+          "filename": "lecture1.pdf",
+          "page": 74,
+          "chunk_index": 223,
+          "score": 0.788703
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 117,
+          "chunk_index": 325,
+          "score": 0.755112
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 26,
+          "chunk_index": 88,
+          "score": 0.754053
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 24,
+          "chunk_index": 82,
+          "score": 0.75176
+        },
+        {
+          "filename": "lecture1.pdf",
+          "page": 97,
+          "chunk_index": 284,
+          "score": 0.751562
+        }
+      ]
+    }
+  ],
+  "experiment": {
+    "script": "evaluation/experiments/rrf_fusion.py",
+    "compared_reports": {
+      "baseline": "evaluation/results/real_v2__e5-small__cs800-co100__corrected.json",
+      "translation": "evaluation/results/real_v2__e5-small__cs800-co100__fr2en-opusmt.json"
+    },
+    "questions": {
+      "q01": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 4,
+          "translation": 4,
+          "rrf": 4
+        }
+      },
+      "q02": {
+        "lang": "fr",
+        "translated_query": "What measure of impurity replaces entropy when a decision tree has to predict a continuous variable?",
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q03": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q04": {
+        "lang": "fr",
+        "translated_query": "In ACP, what vector is chosen as the projection direction when only one component is sought?",
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q05": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 2,
+          "translation": 2,
+          "rrf": 2
+        }
+      },
+      "q06": {
+        "lang": "fr",
+        "translated_query": "Why is a unit standard imposed on the projection vector w in ACP?",
+        "full_rank": {
+          "baseline": 100,
+          "translation": 102,
+          "rrf": 103
+        }
+      },
+      "q07": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 2,
+          "translation": 2,
+          "rrf": 2
+        }
+      },
+      "q08": {
+        "lang": "fr",
+        "translated_query": "To what type of solution does the k-means algorithm converge?",
+        "full_rank": {
+          "baseline": 4,
+          "translation": 2,
+          "rrf": 4
+        }
+      },
+      "q09": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q10": {
+        "lang": "fr",
+        "translated_query": "With the simple string core of the course, what value does the \"on\" component take for the \"common construct\" sequence?",
+        "full_rank": {
+          "baseline": 3,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q11": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q12": {
+        "lang": "fr",
+        "translated_query": "How many solutions does the problem of the maximum margin linear classifier admit?",
+        "full_rank": {
+          "baseline": 3,
+          "translation": 6,
+          "rrf": 3
+        }
+      },
+      "q13": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q14": {
+        "lang": "fr",
+        "translated_query": "What essential property does a CNN owe to its pooling layers?",
+        "full_rank": {
+          "baseline": 2,
+          "translation": 2,
+          "rrf": 2
+        }
+      },
+      "q15": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q16": {
+        "lang": "fr",
+        "translated_query": "In terms of vectors of characteristics, what does the sum of two nuclei correspond to?",
+        "full_rank": {
+          "baseline": 93,
+          "translation": 31,
+          "rrf": 52
+        }
+      },
+      "q17": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 3,
+          "translation": 3,
+          "rrf": 3
+        }
+      },
+      "q18": {
+        "lang": "fr",
+        "translated_query": "What specific values does the CAP retain, and what does the spectral clustering retain?",
+        "full_rank": {
+          "baseline": 17,
+          "translation": 3,
+          "rrf": 7
+        }
+      },
+      "q19": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 2,
+          "translation": 2,
+          "rrf": 2
+        }
+      },
+      "q20": {
+        "lang": "fr",
+        "translated_query": "Why can't we directly apply the maximum likelihood to a Gaussian mixture, and how does the EM algorithm start?",
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q21": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q22": {
+        "lang": "fr",
+        "translated_query": "What does random forest add to bagging to diversify trees, and why is diversity easy to get with decision trees?",
+        "full_rank": {
+          "baseline": 1,
+          "translation": 3,
+          "rrf": 2
+        }
+      },
+      "q23": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q24": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 8,
+          "translation": 8,
+          "rrf": 8
+        }
+      },
+      "q25": {
+        "lang": "fr",
+        "translated_query": "What are the steps in the standard procedure for estimating maximum likelihood?",
+        "full_rank": {
+          "baseline": 4,
+          "translation": 3,
+          "rrf": 2
+        }
+      },
+      "q26": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 5,
+          "translation": 5,
+          "rrf": 5
+        }
+      },
+      "q27": {
+        "lang": "fr",
+        "translated_query": "What are the three modes of a convolution described in the course, and how do they differ?",
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q28": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q29": {
+        "lang": "fr",
+        "translated_query": "What more does a Gaussian blend model bring than k-averages for clustering?",
+        "full_rank": {
+          "baseline": 3,
+          "translation": 3,
+          "rrf": 2
+        }
+      },
+      "q30": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q31": {
+        "lang": "fr",
+        "translated_query": "What does the method of least squares assume on the distribution of errors, and what about the nearest k neighbours?",
+        "full_rank": {
+          "baseline": 5,
+          "translation": 2,
+          "rrf": 2
+        }
+      },
+      "q32": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 4,
+          "translation": 4,
+          "rrf": 4
+        }
+      },
+      "q33": {
+        "lang": "fr",
+        "translated_query": "Which target is an autoencoder trained, and who invented autoencoders?",
+        "full_rank": {
+          "baseline": 5,
+          "translation": 1,
+          "rrf": 2
+        }
+      },
+      "q34": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q35": {
+        "lang": "fr",
+        "translated_query": "How do k-means emerge from the problem of egg and chicken between assignments and centroids, and what is the temporal complexity of the algorithm?",
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q36": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "q37": {
+        "lang": "fr",
+        "translated_query": "What property do the pooling layers bring to a CNN, and what value of step (stride) does the course recommend?",
+        "full_rank": {
+          "baseline": 5,
+          "translation": 4,
+          "rrf": 4
+        }
+      },
+      "q38": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": 1,
+          "translation": 1,
+          "rrf": 1
+        }
+      },
+      "u01": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u02": {
+        "lang": "fr",
+        "translated_query": "What is the temporal complexity of building a decision tree?",
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u03": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u04": {
+        "lang": "fr",
+        "translated_query": "How does the DBSCAN clustering algorithm work?",
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u05": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u06": {
+        "lang": "fr",
+        "translated_query": "Who invented the main components analysis?",
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u07": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u08": {
+        "lang": "fr",
+        "translated_query": "What is the difference between Lloyd's algorithm and Hartigan's algorithm for k-averages?",
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      },
+      "u09": {
+        "lang": "en",
+        "translated_query": null,
+        "full_rank": {
+          "baseline": null,
+          "translation": null,
+          "rrf": null
+        }
+      }
+    }
+  }
+}

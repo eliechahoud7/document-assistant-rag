@@ -7,7 +7,7 @@ import math
 import re
 from collections.abc import Sequence
 
-from doc_assistant.domain.models import Answer, Chunk, Citation, SearchResult
+from doc_assistant.domain.models import Answer, Chunk, Citation, IndexedDocument, SearchResult
 
 _WORD_RE = re.compile(r"\w+")
 
@@ -67,10 +67,13 @@ class InMemoryVectorStore:
         for chunk, vector in zip(chunks, embeddings, strict=True):
             self._items[chunk.chunk_id] = (chunk, list(vector))
 
-    def search(self, query_embedding: Sequence[float], top_k: int) -> list[SearchResult]:
+    def search(
+        self, query_embedding: Sequence[float], top_k: int, *, doc_id: str | None = None
+    ) -> list[SearchResult]:
         scored = [
             SearchResult(chunk, sum(a * b for a, b in zip(query_embedding, vector, strict=True)))
             for chunk, vector in self._items.values()
+            if doc_id is None or chunk.doc_id == doc_id
         ]
         scored.sort(key=lambda result: result.score, reverse=True)
         return scored[:top_k]
@@ -95,6 +98,18 @@ class InMemoryVectorStore:
 
     def count(self) -> int:
         return len(self._items)
+
+    def list_documents(self) -> list[IndexedDocument]:
+        stats: dict[str, IndexedDocument] = {}
+        for chunk, _ in self._items.values():
+            known = stats.get(chunk.doc_id)
+            stats[chunk.doc_id] = IndexedDocument(
+                chunk.doc_id,
+                known.filename if known else chunk.filename,
+                (known.chunk_count if known else 0) + 1,
+                max(known.last_page if known else 0, chunk.page_number),
+            )
+        return sorted(stats.values(), key=lambda d: (d.filename.lower(), d.doc_id))
 
 
 class FakeAnswerGenerator:

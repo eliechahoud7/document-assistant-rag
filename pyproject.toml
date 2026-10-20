@@ -24,6 +24,7 @@ dependencies = [
     "chromadb>=1.5.9,<2",                # phase 2 : base vectorielle locale
     "sentence-transformers>=6.1,<7",     # phase 2 : embeddings E5 (tire torch, CPU sous Windows)
     "google-genai>=2.31,<3",             # phase 4 : génération (API Gemini, niveau gratuit)
+    "streamlit>=1.66,<2",                # interface web (app.py)
 ]
 
 [project.optional-dependencies]
@@ -32,6 +33,12 @@ dev = [
     "pytest-cov>=5.0",
     "ruff>=0.6",
     "mypy>=1.11",
+]
+# Traduction FR -> EN des requêtes (DOCASSIST_QUERY_TRANSLATION=fr-en, désactivée par défaut) :
+# tokenizer du modèle Opus-MT. Modèle : python -m doc_assistant download-translation-model
+translation = [
+    "sentencepiece>=0.2.2,<0.3",
+    "sacremoses>=0.2,<0.3",
 ]
 
 [tool.setuptools.packages.find]

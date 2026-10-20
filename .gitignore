@@ -22,6 +22,7 @@ coverage.xml
 .env
 .env.*
 !.env.example
+.streamlit/secrets.toml
 
 # Données locales (PDF importés, base Chroma) : jamais versionnées
 data/*

@@ -37,6 +37,94 @@ PROXY_WARNING = (
     "(paraphrases non reconnues, erreurs factuelles contenant le bon mot, appui des citations)."
 )
 CORRECTNESS = ("correct", "partial", "incorrect")
+# Questions en partie sans réponse (champ facultatif ``unsupported`` de l'annexe).
+EXPECTED_BEHAVIORS = ("acknowledge", "omit_ok")
+# Formulations d'absence reconnues par défaut (FR/EN, comparées après ``normalize``) : une
+# heuristique par mots-clés, qui ne comprend ni la portée de la négation ni le contexte.
+DEFAULT_ABSENCE_MARKERS = (
+    "not mention*",
+    "not specif*",
+    "not stat*",
+    "not say",
+    "not said",
+    "not provide*",
+    "not give*",
+    "not contain*",
+    "not cover*",
+    "not discuss*",
+    "not indicate*",
+    "not include*",
+    "not recommend*",
+    "no recommendation",
+    "no information",
+    "no mention",
+    "not available",
+    "not in the documents",
+    "not in the passages",
+    "does not address",
+    "do not address",
+    "ne precise*",
+    "ne mentionne*",
+    "ne dit",
+    "ne disent",
+    "ne donne*",
+    "ne contien*",
+    "ne fourni*",
+    "ne recommande*",
+    "ne traite*",
+    "ne parle*",
+    "n'indique*",
+    "n'aborde*",
+    "n'evoque*",
+    "pas mentionn*",
+    "pas precis*",
+    "pas indiqu*",
+    "non mentionn*",
+    "non precis*",
+    "aucune information",
+    "aucune indication",
+    "aucune recommandation",
+    "aucune mention",
+    "ne figure pas",
+    "ne figurent pas",
+    # « gives no year », « recommend no value » : négation portée par « no ».
+    "give no",
+    "gives no",
+    "provide no",
+    "provides no",
+    "recommend no",
+    "recommends no",
+    "mention no",
+    "mentions no",
+    "specify no",
+    "specifies no",
+    # « ne le précisent pas », « n'en parlent pas » : verbe séparé de « ne » (le « * » n'est
+    # reconnu qu'en fin de variante, d'où les formes conjuguées explicites).
+    "precise pas",
+    "precisent pas",
+    "mentionne pas",
+    "mentionnent pas",
+    "indique pas",
+    "indiquent pas",
+    "donne pas",
+    "donnent pas",
+    "dit pas",
+    "disent pas",
+    "recommande pas",
+    "recommandent pas",
+    "parle pas",
+    "parlent pas",
+    "traite pas",
+    "traitent pas",
+    "aborde pas",
+    "abordent pas",
+    "contient pas",
+    "contiennent pas",
+    "fournit pas",
+    "fournissent pas",
+)
+_NUMBER_RE = re.compile(r"\d+(?:[.,]\d+)?")
+_CITATION_MARKER_RE = re.compile(r"\[\d+\]")
 
 
 # ---------------------------------------------------------------- normalisation et faits
@@ -81,12 +169,32 @@ def fact_found(alternatives: Sequence[str], normalized_text: str) -> bool:
 
 
 @dataclass(frozen=True, slots=True)
+class UnsupportedPart:
+    """Partie d'une question que les documents ne couvrent pas (question en partie répondable).
+
+    ``required_facts`` de la réponse attendue ne portent que sur la partie répondable.
+    ``expected_behavior`` : ``acknowledge`` (la réponse doit signaler l'absence) ou ``omit_ok``
+    (taire la partie absente est accepté ; seule l'invention est pénalisée).
+    ``forbidden_facts`` : réponses inventées plausibles, absentes des documents (vérifié au
+    chargement). ``check_numbers`` : signale tout nombre de la réponse absent des passages
+    retrouvés et de la question.
+    """
+
+    part: str
+    expected_behavior: str
+    absence_markers: tuple[str, ...]
+    forbidden_facts: tuple[tuple[str, ...], ...]
+    check_numbers: bool
+
+
+@dataclass(frozen=True, slots=True)
 class GoldAnswer:
     question_id: str
     expected_answer: str
     required_facts: tuple[tuple[str, ...], ...]
     support: str
     flags: tuple[str, ...]
+    unsupported: UnsupportedPart | None = None
 
 
 def _reference_windows(dataset: EvalDataset, question: EvalQuestion) -> list[str]:
@@ -151,8 +259,55 @@ def load_gold(path: Path, dataset: EvalDataset) -> dict[str, GoldAnswer]:
                 raise DatasetError(
                     f"{qid} : le fait requis {fact} ne figure dans aucun passage de référence"
                 )
-        gold[qid] = GoldAnswer(qid, text, tuple(tuple(f) for f in facts), support, tuple(flags))
+        unsupported = None
+        if "unsupported" in item:
+            unsupported = _load_unsupported(qid, item["unsupported"], dataset)
+        gold[qid] = GoldAnswer(
+            qid, text, tuple(tuple(f) for f in facts), support, tuple(flags), unsupported
+        )
     return gold
+
+
+def _is_variant_list(value: Any) -> bool:
+    return (
+        isinstance(value, list)
+        and bool(value)
+        and all(isinstance(a, str) and a.strip().rstrip("*").strip() for a in value)
+    )
+
+
+def _load_unsupported(qid: str, raw: Any, dataset: EvalDataset) -> UnsupportedPart:
+    """Valide le champ facultatif ``unsupported`` d'une réponse attendue."""
+    if not isinstance(raw, dict):
+        raise DatasetError(f"{qid} : 'unsupported' doit être un objet")
+    part, behavior = raw.get("part"), raw.get("expected_behavior", "acknowledge")
+    markers = raw.get("absence_markers", list(DEFAULT_ABSENCE_MARKERS))
+    forbidden, check_numbers = raw.get("forbidden_facts", []), raw.get("check_numbers", True)
+    if not isinstance(part, str) or not part.strip():
+        raise DatasetError(f"{qid} : 'unsupported.part' doit décrire la partie sans réponse")
+    if behavior not in EXPECTED_BEHAVIORS:
+        raise DatasetError(f"{qid} : 'expected_behavior' doit être parmi {EXPECTED_BEHAVIORS}")
+    if not _is_variant_list(markers):
+        raise DatasetError(f"{qid} : 'absence_markers' doit être une liste non vide de chaînes")
+    if not isinstance(forbidden, list) or not all(_is_variant_list(f) for f in forbidden):
+        raise DatasetError(f"{qid} : 'forbidden_facts' doit être une liste de listes non vides")
+    if not isinstance(check_numbers, bool):
+        raise DatasetError(f"{qid} : 'check_numbers' doit être un booléen")
+    # Un fait « interdit » qui figure dans les documents ne prouverait pas une invention.
+    pages = [normalize(page.text) for document in dataset.documents for page in document.pages]
+    for fact in forbidden:
+        if any(fact_found(fact, page) for page in pages):
+            raise DatasetError(
+                f"{qid} : le fait interdit {fact} figure dans les documents ; il ne peut pas "
+                "servir à détecter une invention"
+            )
+    return UnsupportedPart(
+        part.strip(),
+        behavior,
+        tuple(markers),
+        tuple(tuple(f) for f in forbidden),
+        check_numbers,
+    )
 
 
 def load_overrides(path: Path, dataset: EvalDataset) -> dict[str, dict[str, Any]]:
@@ -164,8 +319,9 @@ def load_overrides(path: Path, dataset: EvalDataset) -> dict[str, dict[str, Any]
     for qid, item in raw.items():
         if "correctness" in item and item["correctness"] not in CORRECTNESS:
             raise DatasetError(f"{qid} : 'correctness' doit être parmi {CORRECTNESS}")
-        if "citation_support" in item and not isinstance(item["citation_support"], bool):
-            raise DatasetError(f"{qid} : 'citation_support' doit être un booléen")
+        for key in ("citation_support", "absence_acknowledged", "invented"):
+            if key in item and not isinstance(item[key], bool):
+                raise DatasetError(f"{qid} : '{key}' doit être un booléen")
     return dict(raw)
 
 
@@ -411,15 +567,82 @@ def _score_question(
         outcome = "citation_failure"
     else:
         outcome = "success"
-    return result | {
-        "facts_matched": facts,
-        "facts_supported_by_citations": supported,
-        "correctness_auto": auto,
-        "correctness": final,
-        "human": dict(override) or None,
-        "gold_support": gold.support,
-        "gold_flags": list(gold.flags),
-        "outcome": outcome,
+    extra: dict[str, Any] = {}
+    if gold.unsupported is not None:
+        partial = _score_unsupported(gold.unsupported, question, record, final, override)
+        if partial["invented"]:
+            outcome = "invented_unsupported_part"
+        elif outcome == "success" and partial["behavior"] == "absence_not_acknowledged":
+            outcome = "absence_not_acknowledged"
+        extra["partial"] = partial
+    return (
+        result
+        | {
+            "facts_matched": facts,
+            "facts_supported_by_citations": supported,
+            "correctness_auto": auto,
+            "correctness": final,
+            "human": dict(override) or None,
+            "gold_support": gold.support,
+            "gold_flags": list(gold.flags),
+            "outcome": outcome,
+        }
+        | extra
+    )
+
+
+def _canonical_number(raw: str) -> str:
+    number = raw.replace(",", ".")
+    return number.rstrip("0").rstrip(".") if "." in number else number
+
+
+def _numbers(text: str) -> set[str]:
+    return {_canonical_number(n) for n in _NUMBER_RE.findall(text)}
+
+
+def _score_unsupported(
+    unsupported: UnsupportedPart,
+    question: EvalQuestion,
+    record: Mapping[str, Any],
+    correctness: str,
+    override: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Comportement face à la partie sans réponse (heuristiques par mots-clés, approximatives).
+
+    Invention détectée = un fait interdit figure dans la réponse, ou (``check_numbers``) un
+    nombre de la réponse ne figure ni dans les passages retrouvés ni dans la question. Une
+    invention formulée autrement n'est pas détectée.
+    """
+    answer = record["answer"]
+    abstained = bool(answer["abstained"])
+    # Apostrophe typographique unifiée ; « doesn't » devient « does not » (marqueurs en « not »).
+    raw = _CITATION_MARKER_RE.sub(" ", answer["text"]).replace(chr(0x2019), "'")
+    text = normalize(raw).replace("n't", " not")
+    acknowledged = fact_found(unsupported.absence_markers, text)
+    forbidden = [list(f) for f in unsupported.forbidden_facts if fact_found(f, text)]
+    numbers: list[str] = []
+    if unsupported.check_numbers and not abstained:
+        context = " ".join([question.question, *(p["text"] for p in record["retrieved"])])
+        numbers = sorted(_numbers(text) - _numbers(normalize(context)))
+    acknowledged = bool(override.get("absence_acknowledged", acknowledged))
+    invented = not abstained and bool(override.get("invented", bool(forbidden or numbers)))
+    flagged = acknowledged or unsupported.expected_behavior == "omit_ok"
+    if abstained:
+        behavior = "abstained_entirely"
+    elif invented:
+        behavior = "invented_unsupported_part"
+    elif correctness == "correct":
+        behavior = "complete" if flagged else "absence_not_acknowledged"
+    else:
+        behavior = "supported_part_incomplete" if flagged else "incomplete_and_unacknowledged"
+    return {
+        "part": unsupported.part,
+        "expected_behavior": unsupported.expected_behavior,
+        "absence_acknowledged": acknowledged,
+        "forbidden_facts_found": forbidden,
+        "unsupported_numbers": numbers,
+        "invented": invented,
+        "behavior": behavior,
     }
 
 
@@ -463,6 +686,22 @@ def score_run(
     matched = sum(sum(r["facts_matched"]) for r in answered)
     supported = sum(sum(r["facts_supported_by_citations"]) for r in answered)
     configs = {json.dumps(r.get("config"), sort_keys=True) for r in records}
+    partial_rows = [r for r in answerable if "partial" in r]
+    # Bloc présent seulement si l'annexe utilise 'unsupported' : rapports antérieurs inchangés.
+    partial_block = (
+        {
+            "partial_questions": {
+                "n": len(partial_rows),
+                "behaviors": dict(Counter(r["partial"]["behavior"] for r in partial_rows)),
+                "absence_acknowledged": sum(
+                    r["partial"]["absence_acknowledged"] for r in partial_rows
+                ),
+                "invented": [r["id"] for r in partial_rows if r["partial"]["invented"]],
+            }
+        }
+        if partial_rows
+        else {}
+    )
     return {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "warning": PROXY_WARNING,
@@ -519,6 +758,7 @@ def score_run(
             for r in answerable
             if r["category"] == "multi_passage"
         },
+        **partial_block,
         "outcomes": dict(Counter(r["outcome"] for r in rows)),
         "questions": rows,
     }
@@ -548,8 +788,15 @@ def format_generation_summary(report: Mapping[str, Any]) -> str:
         f"faits appuyés par les passages cités {c['fact_support']}",
         f"Questions sans réponse (n={u['n']}) : {u['correct_abstentions']} abstentions correctes, "
         f"{u['unsupported_answers']} réponses non fondées",
-        f"Issues : {report['outcomes']}",
     ]
+    if "partial_questions" in report:
+        p = report["partial_questions"]
+        lines.append(
+            f"Questions en partie répondables (n={p['n']}) : {p['behaviors']} ; absence signalée "
+            f"{p['absence_acknowledged']}/{p['n']} ; inventions repérées {p['invented']} "
+            "(heuristique : faits interdits et nombres absents des passages)"
+        )
+    lines.append(f"Issues : {report['outcomes']}")
     return "\n".join(lines)
 
 
@@ -618,9 +865,17 @@ def format_review_sheet(
             source = f"[{citation['number']}] {citation['filename']}, page {citation['page']}"
             lines += [f"- {source} : {excerpt}"]
         auto = row.get("correctness_auto", "—")
+        lines += ["", f"**Verdict automatique** : {auto} → issue `{row['outcome']}`"]
+        if "partial" in row:
+            p = row["partial"]
+            lines += [
+                f"**Partie sans réponse** : {p['part']} (attendu : {p['expected_behavior']}) — "
+                f"absence signalée = {p['absence_acknowledged']} ; faits interdits trouvés = "
+                f"{p['forbidden_facts_found']} ; nombres absents des passages = "
+                f"{p['unsupported_numbers']} → `{p['behavior']}` (corrigeable avec "
+                '`"absence_acknowledged"` / `"invented"` dans les verdicts humains)',
+            ]
         lines += [
-            "",
-            f"**Verdict automatique** : {auto} → issue `{row['outcome']}`",
             "",
             "**Relecture** : correction = ____ ; "
             "citations appuient la réponse = oui / non ; note = ____",

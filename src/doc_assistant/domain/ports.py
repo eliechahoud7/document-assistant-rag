@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Protocol
 
 from doc_assistant.domain.errors import EmbeddingModelMismatchError
-from doc_assistant.domain.models import Answer, Chunk, Document, SearchResult
+from doc_assistant.domain.models import Answer, Chunk, Document, IndexedDocument, SearchResult
 
 
 class DocumentLoader(Protocol):
@@ -48,8 +48,14 @@ class VectorStore(Protocol):
 
     def add(self, chunks: Sequence[Chunk], embeddings: Sequence[Sequence[float]]) -> None: ...
 
-    def search(self, query_embedding: Sequence[float], top_k: int) -> list[SearchResult]:
-        """Renvoie au plus ``top_k`` résultats, du plus similaire au moins similaire."""
+    def search(
+        self, query_embedding: Sequence[float], top_k: int, *, doc_id: str | None = None
+    ) -> list[SearchResult]:
+        """Renvoie au plus ``top_k`` résultats, du plus similaire au moins similaire.
+
+        ``doc_id`` restreint la recherche aux chunks de ce document (filtre appliqué par
+        l'index lui-même, avant le classement) ; ``None`` : tous les documents.
+        """
         ...
 
     def get_chunks(self, doc_id: str, chunk_indices: Sequence[int]) -> list[Chunk]:
@@ -62,7 +68,22 @@ class VectorStore(Protocol):
         """Supprime tous les chunks du document et renvoie leur nombre."""
         ...
 
+    def list_documents(self) -> list[IndexedDocument]:
+        """Documents indexés (un par ``doc_id``), triés par nom de fichier."""
+        ...
+
     def count(self) -> int: ...
+
+
+class QueryTranslator(Protocol):
+    """Traduit une requête vers la langue des documents, pour la recherche uniquement."""
+
+    @property
+    def model_name(self) -> str: ...
+
+    def translate(self, text: str) -> str:
+        """Renvoie la traduction ; lève ``TranslationError`` en cas d'échec."""
+        ...
 
 
 class AnswerGenerator(Protocol):

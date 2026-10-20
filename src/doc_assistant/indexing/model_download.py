@@ -1,4 +1,4 @@
-"""Téléchargement explicite du modèle d'embeddings : la seule étape qui utilise le réseau."""
+"""Téléchargement explicite des modèles locaux (embeddings, traduction) : seule étape réseau."""
 
 from __future__ import annotations
 
@@ -19,6 +19,32 @@ REQUIRED_FILES = [
     "special_tokens_map.json",
     "sentencepiece.bpe.model",
 ]
+
+
+# Modèle de traduction Opus-MT : poids safetensors uniquement (~304 Mo ; le dépôt contient
+# aussi les formats PyTorch .bin, TensorFlow et Flax, ~900 Mo de doublons).
+REQUIRED_TRANSLATION_FILES = [
+    "model.safetensors",
+    "config.json",
+    "generation_config.json",
+    "tokenizer_config.json",
+    "source.spm",
+    "target.spm",
+    "vocab.json",
+]
+
+
+def download_translation_model(settings: Settings) -> Path:
+    from huggingface_hub import snapshot_download
+
+    target = settings.translation_model_dir
+    snapshot_download(
+        repo_id=settings.translation_model,
+        revision=settings.translation_model_revision,
+        local_dir=target,
+        allow_patterns=REQUIRED_TRANSLATION_FILES,
+    )
+    return target
 
 
 def download_embedding_model(settings: Settings) -> Path:

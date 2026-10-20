@@ -87,7 +87,7 @@ automatiquement : définissez les variables dans la session PowerShell).
 | Variable | Défaut | Rôle |
 |---|---|---|
 | `DOCASSIST_DATA_DIR` | `data` | dossier de l'index ChromaDB (`<dir>\chroma`) |
-| `DOCASSIST_MODELS_DIR` | `models` | dossier du modèle d'embeddings |
+| `DOCASSIST_MODELS_DIR` | `models` | dossier des modèles locaux (embeddings, traduction facultative) |
 | `DOCASSIST_RETRIEVAL_TOP_K` | `5` | passages retrouvés par question |
 | `DOCASSIST_CONTEXT_NEIGHBORS` | `1` | chunks voisins ajoutés à chaque passage envoyé au LLM (0 = top-k seul) |
 | `DOCASSIST_CHUNK_SIZE` / `_OVERLAP` | `800` / `100` | découpage (caractères) ; changer impose de réindexer |
@@ -95,6 +95,10 @@ automatiquement : définissez les variables dans la session PowerShell).
 | `DOCASSIST_LLM_MODEL` | `gemini-3.5-flash-lite` | modèle Gemini |
 | `DOCASSIST_LLM_TIMEOUT_S` / `_MAX_RETRIES` | `30` / `1` | délai ; nouvelles tentatives sur erreurs serveur uniquement |
 | `GEMINI_API_KEY` | — | clé API, lue uniquement dans l'environnement, jamais affichée ni enregistrée |
+| `DOCASSIST_QUERY_TRANSLATION` | `none` | `fr-en` : traduit les questions françaises pour la recherche uniquement (expérimental, voir [Résultats](#expérience--traduction-fr--en-des-requêtes-et-fusion-rrf-real_v2)) |
+| `DOCASSIST_APP_UPLOADS` | `true` | ajout et suppression de documents depuis l'interface web ; `false` pour une bibliothèque en lecture seule (déploiement public) |
+| `DOCASSIST_MODEL_AUTO_DOWNLOAD` | `false` | `true` : télécharge le modèle d'embeddings au premier démarrage s'il est absent (déploiement) |
+| `DOCASSIST_DEMO_DOCS_DIR` | — | mode démonstration : PDF publics indexés au démarrage ; ajout et suppression toujours désactivés (voir [Déploiement](#déploiement-streamlit-community-cloud)) |
 
 ## Exemple (tiré d'un enregistrement existant)
 
@@ -159,6 +163,81 @@ Le score de similarité ne permet pas de reconnaître une question sans réponse
 E6a corrige Q05, Q08, Q14 et Q15, dont l'information se trouvait dans le chunk voisin d'un
 passage retrouvé ; aucune question ne régresse. Décision : [ADR 0008](docs/adr/0008-contexte-chunks-voisins.md).
 
+### Expérience : traduction FR → EN des requêtes et fusion RRF (`real_v2`)
+
+Jeu `real_v2` corrigé (47 questions : 38 répondables, dont 18 en français, et 9 sans réponse ;
+SHA-256 `75abb1ee…`). Réglages identiques pour les trois runs : `multilingual-e5-small`
+(révision `614241f6`), chunks 800/100, top-5, chevauchement minimal 50 %, 370 chunks, index
+temporaire, mêmes versions des bibliothèques. Recherche seule, sans LLM.
+
+- **Traduction des requêtes (facultative, désactivée par défaut).** Avec
+  `DOCASSIST_QUERY_TRANSLATION=fr-en`, une question détectée comme française est traduite en
+  anglais par un modèle local (`Helsinki-NLP/opus-mt-fr-en`, révision figée) **pour la recherche
+  uniquement** : la question d'origine reste celle envoyée au LLM et affichée. Les questions
+  anglaises ne sont pas traduites ; si la traduction échoue, la question d'origine est utilisée.
+- **Fusion RRF (expérience isolée, non intégrée à l'application).**
+  [`evaluation/experiments/rrf_fusion.py`](evaluation/experiments/rrf_fusion.py) fusionne le
+  classement de la question d'origine et celui de sa traduction par *Reciprocal Rank Fusion*
+  (Cormack et al., 2009) : score d'un passage = Σ 1 / (60 + rang), k = 60 (valeur standard, non
+  réglée sur ce jeu). Pour l'AUROC, le score du passage en tête est son meilleur cosinus.
+
+| Run (38 questions répondables) | Hit@1 | Hit@3 | Hit@5 | MRR | AUROC (absence) |
+|---|---|---|---|---|---|
+| Référence ([`…__corrected.json`](evaluation/results/real_v2__e5-small__cs800-co100__corrected.json)) | 0,474 | 0,684 | 0,895 | 0,609 | 0,918 |
+| Traduction seule ([`…__fr2en-opusmt.json`](evaluation/results/real_v2__e5-small__cs800-co100__fr2en-opusmt.json)) | 0,500 | 0,789 | 0,895 | 0,648 | 0,942 |
+| Origine + traduction, RRF ([`…__fr2en-rrf60.json`](evaluation/results/real_v2__e5-small__cs800-co100__fr2en-rrf60.json)) | 0,474 | 0,763 | 0,895 | 0,641 | 0,942 |
+
+Questions françaises (18), référence / traduction / RRF : Hit@1 0,333 / 0,389 / 0,333 ;
+Hit@3 0,556 / 0,778 / 0,722 ; Hit@5 0,833 dans les trois cas ; MRR 0,478 / 0,560 / 0,546.
+Questions anglaises (20) : résultats identiques dans les trois runs (elles ne sont pas traduites).
+
+- **Traduction seule** : 8 questions mieux classées (dont Q18, rang 17 → 3, qui entre dans le
+  top-5, et Q16, 93 → 31), 3 moins bien (Q12, 3 → 6, qui sort du top-5 ; Q22, 1 → 3 ; Q06,
+  100 → 102), 27 inchangées.
+- **RRF** : récupère Q12 (rang 3) mais perd Q18 (rang 7). La fusion favorise les passages bien
+  classés par les deux requêtes et pénalise un passage que seule la traduction trouve ; elle
+  laisse hors du top-5 les mêmes questions que la référence.
+- **Échecs communs** : Q06 et Q16 restent au-delà du rang 30 dans les trois runs ; le modèle
+  traduit littéralement des termes du domaine (« norme » → *standard*, « noyaux » → *nuclei*,
+  « ACP » non traduit en *PCA*). Q24 (anglaise) reste au rang 8 : la liste attendue est coupée
+  entre deux chunks.
+- **AUROC** : la hausse est à lire avec prudence, car les questions françaises sans réponse
+  obtiennent elles aussi des scores plus élevés après traduction.
+
+**Conclusion.** Ni la traduction ni la RRF n'améliorent le Hit@5 (34/38 dans les trois runs).
+La traduction améliore le classement des questions françaises (MRR +0,08) mais en fait sortir
+une du top-5 ; la RRF ne fait pas mieux que la traduction seule. La traduction reste donc
+**désactivée par défaut** et la RRF **n'est pas intégrée** à l'application. Piste suivante, non
+mesurée : dans les trois runs, 36 des 38 questions ont un passage pertinent dans le top-20 ; un
+reranking de ces 20 candidats pourrait au mieux gagner 2 questions (il faudrait un modèle local
+supplémentaire). Q06 et Q16 exigeraient plutôt une meilleure représentation de la requête.
+
+**Limites.** 18 questions françaises seulement (une question = 5,6 points de Hit@5 en français) ;
+un seul modèle de traduction ; documents uniquement en anglais ; jeu rédigé par l'assistant de
+développement et utilisé aussi pour le diagnostic (références de Q04, Q09, Q20, Q21 et Q33
+complétées après lecture des résultats), sans jeu de test indépendant ; détection du français
+heuristique, vérifiée seulement sur les 151 questions des jeux du dépôt.
+
+Reproduire (index temporaires ; la RRF refuse d'écrire si elle ne reproduit pas exactement les
+deux rapports de comparaison, et n'écrase jamais un rapport existant) :
+
+```powershell
+# Une fois : dépendances facultatives et modèle de traduction local (~304 Mo)
+.\.venv\Scripts\python.exe -m pip install -e ".[translation]"
+.\.venv\Scripts\python.exe -m doc_assistant download-translation-model
+
+# Référence, puis traduction seule
+.\.venv\Scripts\python.exe -m doc_assistant evaluate evaluation\datasets\real_v2.json -k 5 -o reference.json
+$env:DOCASSIST_QUERY_TRANSLATION = "fr-en"
+.\.venv\Scripts\python.exe -m doc_assistant evaluate evaluation\datasets\real_v2.json -k 5 -o traduction.json
+Remove-Item Env:DOCASSIST_QUERY_TRANSLATION
+
+# Fusion RRF, comparée aux deux rapports versionnés
+.\.venv\Scripts\python.exe evaluation\experiments\rrf_fusion.py evaluation\datasets\real_v2.json `
+    --baseline evaluation\results\real_v2__e5-small__cs800-co100__corrected.json `
+    --translation evaluation\results\real_v2__e5-small__cs800-co100__fr2en-opusmt.json -o rrf.json
+```
+
 ## Limites
 
 - **Q10 (procédure leave-one-out) reste incorrecte** : la réponse nomme la méthode sans décrire la
@@ -178,8 +257,25 @@ passage retrouvé ; aucune question ne régresse. Décision : [ADR 0008](docs/ad
 
 ## Hors périmètre de cette version
 
-API FastAPI (le paquet `api/` est vide), interface utilisateur, Docker, reranking ou recherche
-hybride, et toute nouvelle expérience de recherche (modèle d'embeddings, découpage, top-k).
+Inclus : une interface web Streamlit ([`app.py`](app.py),
+`.\.venv\Scripts\python.exe -m streamlit run app.py --server.address localhost` ; l'option
+limite l'accès à votre machine) qui travaille sur une seule bibliothèque :
+l'index de `DOCASSIST_DATA_DIR` (`data` par défaut), le même que celui des commandes `index`,
+`search` et `ask`. La section « Mes documents » liste les PDF indexés (nom, pages, passages, date
+d'ajout, état), y compris ceux indexés avec la CLI, et persiste entre les sessions grâce au
+registre `<DOCASSIST_DATA_DIR>\documents.json`. On peut y ajouter plusieurs PDF à la fois (même
+pipeline que `index`, même déduplication par SHA-256, sans appel au LLM ; PDF à texte
+sélectionnable, 20 Mo au plus, fichier conservé dans `<DOCASSIST_DATA_DIR>\uploads\`) et
+supprimer un document : seuls ses passages (même `doc_id`), son PDF conservé et son entrée du
+registre sont retirés. Les questions portent sur toute la bibliothèque, avec la même
+configuration LLM que `ask`. Pour un déploiement public, choisissez un dossier sans le CV
+(par exemple `DOCASSIST_DATA_DIR=data\courses`) et `DOCASSIST_APP_UPLOADS=false`.
+
+Hors périmètre : API FastAPI (le paquet `api/` est vide), OCR des PDF scannés, Docker, reranking
+ou recherche hybride, et toute
+nouvelle expérience de recherche (modèle d'embeddings, découpage, top-k) ; seules exceptions, la
+traduction facultative des requêtes et l'expérience RRF décrites dans
+[Résultats](#expérience--traduction-fr--en-des-requêtes-et-fusion-rrf-real_v2).
 
 ## Évaluation
 
@@ -228,9 +324,44 @@ docs/              # architecture et ADR 0001 à 0008
 Une fixture bloque toute connexion réseau pendant les tests ; la génération y est simulée par des
 générateurs factices. Le test réel Gemini (`-m llm`) n'est jamais sélectionné par défaut.
 
+## Déploiement (Streamlit Community Cloud)
+
+> **Avant toute mise en ligne publique** : selon les conditions de l'API Gemini, rendre l'outil
+> accessible à des utilisateurs de l'EEE, de la Suisse ou du Royaume-Uni exige l'offre payante
+> ([ADR 0006](docs/adr/0006-generation-gemini.md)). Vérifiez les conditions en vigueur.
+
+Fichiers utilisés : [`requirements.txt`](requirements.txt) (installe le projet et PyTorch
+**CPU** `torch==2.14.1+cpu`, sans paquet NVIDIA), [`.streamlit/config.toml`](.streamlit/config.toml)
+(sans adresse d'écoute : en local, gardez `--server.address localhost`) et
+[`demo/documents/`](demo/documents/SOURCES.md) (seuls PDF publiés : cours MIT OCW sous
+CC BY-NC-SA 4.0). Ni `data/` (index, CV, registre), ni `models/`, ni `.env`, ni
+`.streamlit/secrets.toml` ne sont versionnés.
+
+1. Poussez la branche sur GitHub, puis sur share.streamlit.io : *Create app*, dépôt, branche,
+   fichier `app.py` ; dans *Advanced settings*, choisissez **Python 3.13**.
+2. Dans *Secrets*, définissez (clés au premier niveau : elles deviennent des variables
+   d'environnement) :
+
+   ```toml
+   GEMINI_API_KEY = "..."
+   DOCASSIST_LLM_PROVIDER = "gemini"
+   DOCASSIST_MODEL_AUTO_DOWNLOAD = "true"
+   DOCASSIST_DEMO_DOCS_DIR = "demo/documents"
+   DOCASSIST_APP_UPLOADS = "false"
+   ```
+
+3. Premier démarrage : installation des dépendances, téléchargement du modèle (~493 Mo), puis
+   indexation des PDF de démonstration. Le disque du cloud est temporaire : après une mise en
+   veille, le modèle est retéléchargé et les documents réindexés automatiquement.
+
+En mode démonstration, l'ajout et la suppression de documents sont toujours désactivés, même si
+`DOCASSIST_APP_UPLOADS` vaut `true`.
+
 ## Sources des documents d'évaluation et licences
 
-Les PDF d'évaluation ne sont **pas** inclus dans le dépôt (`evaluation/documents/` est ignoré).
+Les PDF d'évaluation ne sont **pas** inclus dans le dépôt (`evaluation/documents/` est ignoré),
+à l'exception de copies non modifiées de `lecture2.pdf` et `lecture3.pdf` dans
+`demo/documents/` pour la démonstration (attribution : [`SOURCES.md`](demo/documents/SOURCES.md)).
 Les jeux d'évaluation, l'annexe de réponses, les rapports et les fiches de relecture contiennent
 de **courts extraits** de ces documents :
 

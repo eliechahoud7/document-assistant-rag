@@ -1,0 +1,10 @@
+# Dépendances pour Streamlit Community Cloud (Linux, Python 3.13).
+# Les dépendances du projet restent déclarées dans pyproject.toml : « . » installe le paquet
+# doc_assistant avec elles. torch est épinglé sur sa version CPU (suffixe +cpu) : aucun paquet
+# NVIDIA/CUDA n'est téléchargé.
+# --find-links (page des seules roues torch) plutôt que --extra-index-url : avec un index
+# supplémentaire, uv (utilisé par Streamlit Cloud) prendrait aussi requests, numpy, etc. sur
+# l'index PyTorch, dans des versions trop anciennes (résolution impossible, vérifié).
+--find-links https://download.pytorch.org/whl/cpu/torch/
+torch==2.14.1+cpu
+.

@@ -17,14 +17,17 @@ class Retriever:
         self._store = store
         self.default_top_k = default_top_k
 
-    def search(self, question: str, top_k: int | None = None) -> list[SearchResult]:
+    def search(
+        self, question: str, top_k: int | None = None, *, doc_id: str | None = None
+    ) -> list[SearchResult]:
+        """Passages les plus proches ; ``doc_id`` limite la recherche à un seul document."""
         question = question.strip()
         if not question:
             raise ValueError("la question ne peut pas être vide")
         k = self.default_top_k if top_k is None else top_k
         if k <= 0:
             raise ValueError("top_k doit être strictement positif")
-        return self._store.search(self._embedder.embed_query(question), k)
+        return self._store.search(self._embedder.embed_query(question), k, doc_id=doc_id)
 
     def expand_with_neighbors(
         self, results: Sequence[SearchResult], window: int

@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 
+from doc_assistant.domain.errors import DocumentScopeError
 from doc_assistant.domain.models import Answer, SearchResult
 from doc_assistant.domain.ports import AnswerGenerator
 from doc_assistant.generation.answers import no_passage_answer
@@ -35,14 +36,27 @@ class QAService:
         self._generator = generator
         self.context_neighbors = context_neighbors
 
-    def retrieve(self, question: str, top_k: int | None = None) -> list[SearchResult]:
-        results = self._retriever.search(question, top_k=top_k)
-        return self._retriever.expand_with_neighbors(results, self.context_neighbors)
+    def retrieve(
+        self, question: str, top_k: int | None = None, *, doc_id: str | None = None
+    ) -> list[SearchResult]:
+        """Passages envoyés au LLM. Avec ``doc_id``, recherche et voisins (même document)
+        proviennent uniquement de ce document."""
+        results = self._retriever.search(question, top_k=top_k, doc_id=doc_id)
+        passages = self._retriever.expand_with_neighbors(results, self.context_neighbors)
+        foreign = sorted({p.chunk.doc_id for p in passages} - {doc_id}) if doc_id else []
+        if foreign:
+            raise DocumentScopeError(
+                f"passages d'autres documents ({', '.join(foreign)}) retrouvés pour le document "
+                f"{doc_id} : rien n'est envoyé au LLM"
+            )
+        return passages
 
     def answer(self, question: str, passages: Sequence[SearchResult]) -> QAResult:
         if not passages:
             return QAResult(no_passage_answer(self._generator.model_name), ())
         return QAResult(self._generator.generate(question.strip(), passages), tuple(passages))
 
-    def ask(self, question: str, top_k: int | None = None) -> QAResult:
-        return self.answer(question, self.retrieve(question, top_k=top_k))
+    def ask(
+        self, question: str, top_k: int | None = None, *, doc_id: str | None = None
+    ) -> QAResult:
+        return self.answer(question, self.retrieve(question, top_k=top_k, doc_id=doc_id))
