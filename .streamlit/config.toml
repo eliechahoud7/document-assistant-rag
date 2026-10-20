@@ -1,0 +1,14 @@
+# Thème et confidentialité de l'interface web (streamlit run app.py).
+[theme]
+base = "light"
+primaryColor = "#2563eb"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f8fafc"
+textColor = "#0f172a"
+
+[browser]
+gatherUsageStats = false
+
+# Écoute locale uniquement : l'interface donne accès au CV et consomme le quota Gemini.
+[server]
+address = "localhost"

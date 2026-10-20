@@ -24,6 +24,7 @@ dependencies = [
     "chromadb>=1.5.9,<2",                # phase 2 : base vectorielle locale
     "sentence-transformers>=6.1,<7",     # phase 2 : embeddings E5 (tire torch, CPU sous Windows)
     "google-genai>=2.31,<3",             # phase 4 : génération (API Gemini, niveau gratuit)
+    "streamlit>=1.66,<2",                # interface web (app.py)
 ]
 
 [project.optional-dependencies]
