@@ -1,0 +1,243 @@
+{
+  "name": "real_v2_answers",
+  "dataset": "real_v2",
+  "dataset_sha256": "2831b594487b2fd55051a73ef77f8bfb6786b824430bee96aba6c5ae9b0c5cb4",
+  "description": "Réponses attendues pour les questions répondables de real_v2, rédigées à partir des seuls passages de référence (avant toute génération). Même format que real_v1_answers : 'required_facts' = liste de faits, chacun une liste de variantes (FR/EN), comparées sans casse ni accents, en mots entiers ('*' final = préfixe). Les faits multiples (multi_fact, multi_part_*) mesurent la complétude. Pour multi_part_partial, les faits ne couvrent que la partie répondable ; le champ facultatif 'unsupported' (part, expected_behavior, forbidden_facts, absence_markers, check_numbers) décrit la partie sans réponse et permet de noter par mots-clés le signalement de l'absence et les inventions évidentes ; 'weak' et les flags rappellent que la relecture reste nécessaire. Correction automatique = indicateur approximatif. Rédigé par l'assistant de développement ; révision 1 (2026-10-20) : ajout de 'unsupported' aux 7 questions multi_part_partial (real_v2.json inchangé).",
+  "answers": {
+    "q01": {
+      "expected_answer": "Splitting on Friend gives an information gain of 0.42, against only 0.02 for Gender; Friend is the best possible split.",
+      "required_facts": [["0.42", "0,42"], ["0.02", "0,02"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q02": {
+      "expected_answer": "For regression trees (continuous target), squared error is used instead of entropy to measure impurity.",
+      "required_facts": [["squared error", "erreur quadratique", "erreurs quadratiques", "erreur au carre", "moindres carres"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q03": {
+      "expected_answer": "Because decision trees are unstable learners: they can vary significantly with minor changes to the training data, so diversity among trees is easy to obtain.",
+      "required_facts": [["unstable", "instable*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q04": {
+      "expected_answer": "The eigenvector of the (sample covariance) matrix corresponding to the largest eigenvalue becomes w.",
+      "required_facts": [["eigenvector*", "vecteur propre", "vecteurs propres"], ["largest", "plus grande", "plus grandes"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q05": {
+      "expected_answer": "Non-linearity: autoencoders are neural networks, so they offer over PCA the same advantage that MLPs offer over OLS.",
+      "required_facts": [["non-linearit*", "nonlinearit*", "non linearit*", "non-linear", "nonlinear", "non lineaire*", "non-lineaire*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q06": {
+      "expected_answer": "Without the constraint w⊤w = 1 the projection is no longer orthogonal and one could 'cheat' by projecting out towards infinity to get a huge variance in Z-space.",
+      "required_facts": [["infini*", "infinity"], ["orthogonal*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q07": {
+      "expected_answer": "By choosing k points at random from the dataset and using them as the initial centroids.",
+      "required_facts": [["random*", "aleatoire*", "au hasard"], ["from our dataset", "from the dataset", "data points", "dataset", "jeu de donnees", "des donnees", "training points"]],
+      "support": "weak",
+      "flags": ["Le second fait accepte des mots génériques (« dataset », « données ») : la relecture doit vérifier que les centroïdes initiaux sont bien des points tirés du jeu de données."]
+    },
+    "q08": {
+      "expected_answer": "After iterating until convergence, k-means reaches a local optimum.",
+      "required_facts": [["local optimum", "local optima", "optimum local", "optima locaux", "optimums locaux", "local minimum", "minimum local", "minima locaux"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q09": {
+      "expected_answer": "The features are assumed independent (given the class): the joint distribution is a simple product of per-feature terms.",
+      "required_facts": [["independen*", "independan*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q10": {
+      "expected_answer": "The 'on' component equals 2: 'on' occurs twice as a contiguous subsequence of 'the common construct'.",
+      "required_facts": [["2", "deux", "two", "twice"]],
+      "support": "weak",
+      "flags": ["Le fait requis est le nombre 2, qui peut apparaître ailleurs dans la réponse (ex. « length 2 ») : la relecture doit vérifier qu'il désigne bien la valeur de la composante."]
+    },
+    "q11": {
+      "expected_answer": "λ, which lies in (0, 1), specifies the penalty for non-contiguous matches of the subsequence u.",
+      "required_facts": [["penal*"], ["non-contiguous", "noncontiguous", "not contiguous", "non contigu*", "discontinu*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q12": {
+      "expected_answer": "Only one: the solution is unique (the maximum margin classifier 'locks in place' where the margin cannot be increased any further).",
+      "required_facts": [["unique", "une seule", "un seul", "single", "one solution", "only one"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q13": {
+      "expected_answer": "The offset θ0 is not regularized, to preserve the similarity with classification.",
+      "required_facts": [["θ0", "theta0", "theta_0", "theta 0", "θ_0", "offset", "bias", "biais", "intercept"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q14": {
+      "expected_answer": "Shift (translation) invariance, obtained through pooling; it is one of the most useful properties of CNNs.",
+      "required_facts": [["invarian*"], ["translation*", "shift*", "decalage*", "deplacement*", "position*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q15": {
+      "expected_answer": "Only a finite number: n − 1 split points, between consecutive data points.",
+      "required_facts": [["n− 1", "n−1", "n − 1", "n-1", "n - 1", "n moins 1", "n minus 1"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q16": {
+      "expected_answer": "Adding two kernels corresponds to concatenating their feature vectors.",
+      "required_facts": [["concaten*", "juxtapos*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q17": {
+      "expected_answer": "Gini impurity is an alternative to entropy; in the vous/tu example the best split is on the Friend attribute (gain 0.42 vs 0.02 for Gender).",
+      "required_facts": [["gini"], ["friend", "ami", "amis", "amitie"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q18": {
+      "expected_answer": "PCA keeps the largest eigenvalues (of the d-dimensional covariance matrix); spectral clustering considers the smallest eigenvalues (of the n-dimensional Laplacian matrix).",
+      "required_facts": [["largest", "plus grande", "plus grandes"], ["smallest", "plus petite", "plus petites"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q19": {
+      "expected_answer": "1) Assign each point to the closest cluster (centroid); 2) recompute each centroid as the mean of the points assigned to it; repeat until convergence.",
+      "required_facts": [["assign*", "affect*", "attribu*", "closest", "plus proche"], ["centroid*", "average*", "moyenne*", "centre*", "center*", "cluster mean*", "mean of"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q20": {
+      "expected_answer": "Because the assignments z are latent (unobserved) variables, so standard MLE gets stuck with too many unknowns; EM starts by initialising all parameters with random values (respecting constraints such as the π summing to 1).",
+      "required_facts": [["latent*", "cache*", "unobserved", "non observ*", "hidden"], ["random*", "aleatoire*", "au hasard"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q21": {
+      "expected_answer": "SGD computes each update on random samples (mini-batches) instead of the whole dataset; it needs more iterations, but each iteration is far cheaper, which is worth it for large datasets.",
+      "required_facts": [["random*", "aleatoire*", "au hasard"], ["mini-batch*", "minibatch*", "mini batch*", "sample*", "echantillon*"], ["larger number of iterations", "more iterations", "plus d'iterations", "davantage d'iterations"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q22": {
+      "expected_answer": "Random forests consider a random subset of the features at each split; diversity is easy to obtain because decision trees are unstable learners that change a lot with small changes to the training data.",
+      "required_facts": [["subset of features", "random subset", "sous-ensemble*", "feature*", "variable*", "caracteristique*"], ["unstable", "instable*"]],
+      "support": "weak",
+      "flags": ["Le premier fait accepte des mots génériques (« features », « variables ») : la relecture doit vérifier qu'il s'agit d'un sous-ensemble aléatoire de variables à chaque division."]
+    },
+    "q23": {
+      "expected_answer": "X⊤X cannot be inverted (not full rank), so there is no unique solution (infinitely many ŵ); the course gets around it with gradient descent.",
+      "required_facts": [["invert*", "inverse*", "inversi*", "full rank", "rang"], ["unique", "infinite", "infinit*"], ["gradient descent", "descente de gradient", "gd"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q24": {
+      "expected_answer": "Five assumptions: (1) a linear relationship between x and y; (2) no collinearity among features; (3) iid sampling of data points; (4) homoskedasticity (fixed σ); (5) irreducible error with mean 0, Gaussian-distributed.",
+      "required_facts": [["linear", "linearity", "linearite", "lineaire"], ["collinear*", "colinear*", "colineari*"], ["iid", "i.i.d", "independent*", "independan*"], ["homoskedastic*", "homoscedastic*", "homoscedasti*"], ["gaussian*", "gaussien*", "normal*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q25": {
+      "expected_answer": "1) Write out the likelihood using the parameters θ; 2) take the log; 3) take the derivative; 4) set it to 0 and solve for θ.",
+      "required_facts": [["write out", "write the likelihood", "ecri*", "formul*", "exprim*", "express*"], ["log*"], ["derivative", "derive*", "gradient"], ["set to 0", "set to zero", "set it to 0", "set it to zero", "egal* a 0", "egal* a zero", "annul*", "= 0"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q26": {
+      "expected_answer": "Until convergence: 1) initialise the parameters θ; 2) E step: compute all responsibilities r_ik with the current θ; 3) M step: re-estimate all θ (MLE) from the x_i and r_i; 4) repeat from step 2.",
+      "required_facts": [["initiali*"], ["e. step", "e step", "e-step", "etape e", "expectation", "esperance"], ["m. step", "m step", "m-step", "etape m", "maximi*"], ["repeat*", "repet*", "until convergence", "jusqu'a convergence", "iterat*", "convergence"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q27": {
+      "expected_answer": "full: start at the first point of overlap between x and w; valid: start where x and w fully overlap; same: the result has the same length as x. The mode matters little in large networks.",
+      "required_facts": [["full"], ["valid"], ["same"]],
+      "support": "weak",
+      "flags": ["Les mots « full », « valid » et « same » sont courants : la relecture doit vérifier que chacun désigne bien un mode de convolution, avec sa définition."]
+    },
+    "q28": {
+      "expected_answer": "EM for GMMs is a 'soft' version of k-means; conversely, replacing the E step by a hard assignment (argmax) turns EM into 'Maximization Maximization', i.e. k-means.",
+      "required_facts": [["hard", "dure", "dures", "argmax"], ["soft", "douce", "souple", "probabil*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q29": {
+      "expected_answer": "Beyond centroids, a GMM gives each cluster a shape (covariance Σ_k) and a probability that an instance belongs to each cluster (soft, probabilistic clustering), plus the relative influence π of each cluster.",
+      "required_facts": [["covarian*", "shape", "forme"], ["probab*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q30": {
+      "expected_answer": "Naive Bayes assumes the features are independent; Gaussian Bayes removes this by including a covariance matrix (x ∼ N(μ_y, Σ_y)).",
+      "required_facts": [["independen*", "independan*"], ["covarian*", "co-varian*"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q31": {
+      "expected_answer": "OLS assumes the irreducible error has mean 0 and is Gaussian-distributed (and homoskedastic); kNN makes no assumption on the distribution of errors.",
+      "required_facts": [["gaussian*", "gaussien*", "normal*"], ["no assumption", "aucune hypothese", "pas d'hypothese", "makes no", "does not assume", "sans hypothese", "ne suppose rien", "aucune supposition"]],
+      "support": "strong",
+      "flags": []
+    },
+    "q32": {
+      "expected_answer": "A random forest considers a random subset of features at each split (possibly combined with bagging). The documents do not say how many trees to use.",
+      "required_facts": [["subset", "sous-ensemble*", "feature*", "variable*", "caracteristique*"]],
+      "support": "weak",
+      "flags": ["Question en partie sans réponse : la partie « nombre d'arbres recommandé » ne figure dans aucun des trois PDF (recherche textuelle sur le texte extrait). Les faits requis ne vérifient que la partie répondable ; le champ 'unsupported' repère par mots-clés le signalement de l'absence et les inventions évidentes (faits interdits, nombres absents des passages), de façon approximative : la relecture doit confirmer que l'absence est signalée sans être comblée par une invention."],
+      "unsupported": {"part": "nombre d'arbres recommandé pour une forêt aléatoire", "forbidden_facts": [["100 trees", "100 arbres"], ["500 trees", "500 arbres"], ["1000 trees", "1000 arbres", "1 000 arbres"]]}
+    },
+    "q33": {
+      "expected_answer": "Autoencoders are neural networks trained to predict their own inputs (output = input). The documents do not say who invented them.",
+      "required_facts": [["own input*", "propres entree*", "leurs entrees", "son entree", "ses entrees", "input*", "entree*", "reconstrui*", "reprodui*"]],
+      "support": "weak",
+      "flags": ["Question en partie sans réponse : la partie « inventeur des autoencodeurs » ne figure dans aucun des trois PDF (recherche textuelle sur le texte extrait). Les faits requis ne vérifient que la partie répondable ; le champ 'unsupported' repère par mots-clés le signalement de l'absence et les inventions évidentes (faits interdits, nombres absents des passages), de façon approximative : la relecture doit confirmer que l'absence est signalée sans être comblée par une invention."],
+      "unsupported": {"part": "inventeur des autoencodeurs", "forbidden_facts": [["hinton"], ["rumelhart"], ["kramer"], ["ballard"]]}
+    },
+    "q34": {
+      "expected_answer": "The Gini coefficient is commonly used to measure income inequality. The documents give no publication year.",
+      "required_facts": [["income inequalit*", "inequalit*", "inegalite*"]],
+      "support": "weak",
+      "flags": ["Question en partie sans réponse : la partie « année de publication du coefficient de Gini » ne figure dans aucun des trois PDF (recherche textuelle sur le texte extrait). Les faits requis ne vérifient que la partie répondable ; le champ 'unsupported' repère par mots-clés le signalement de l'absence et les inventions évidentes (faits interdits, nombres absents des passages), de façon approximative : la relecture doit confirmer que l'absence est signalée sans être comblée par une invention."],
+      "unsupported": {"part": "année de publication du coefficient de Gini", "forbidden_facts": [["corrado gini", "corrado"], ["1912"], ["1921"]]}
+    },
+    "q35": {
+      "expected_answer": "They set one set of parameters (the cluster means) randomly, solve for the other (the assignments), and iterate, alternating between the two until convergence. The documents do not give the time complexity of k-means.",
+      "required_facts": [["random*", "aleatoire*", "au hasard"], ["iterat*", "altern*", "tour a tour"]],
+      "support": "weak",
+      "flags": ["Question en partie sans réponse : la partie « complexité temporelle des k-moyennes » ne figure dans aucun des trois PDF (recherche textuelle sur le texte extrait). Les faits requis ne vérifient que la partie répondable ; le champ 'unsupported' repère par mots-clés le signalement de l'absence et les inventions évidentes (faits interdits, nombres absents des passages), de façon approximative : la relecture doit confirmer que l'absence est signalée sans être comblée par une invention."],
+      "unsupported": {"part": "complexité temporelle des k-moyennes", "forbidden_facts": [["o(nkd*", "o(n k d*", "o(knd*", "o(nkt*", "o(tnk*"], ["linear in n", "lineaire en n", "linear time", "temps lineaire"]]}
+    },
+    "q36": {
+      "expected_answer": "λ lies in (0, 1) and specifies the penalty for non-contiguous matches. The documents recommend no particular value.",
+      "required_facts": [["(0, 1)", "(0,1)", "between 0 and 1", "entre 0 et 1", "]0, 1[", "]0,1["]],
+      "support": "weak",
+      "flags": ["Question en partie sans réponse : la partie « valeur de lambda recommandée » ne figure dans aucun des trois PDF (recherche textuelle sur le texte extrait). Les faits requis ne vérifient que la partie répondable ; le champ 'unsupported' repère par mots-clés le signalement de l'absence et les inventions évidentes (faits interdits, nombres absents des passages), de façon approximative : la relecture doit confirmer que l'absence est signalée sans être comblée par une invention."],
+      "unsupported": {"part": "valeur de lambda recommandée", "forbidden_facts": [["λ = 0.5", "λ=0.5", "lambda = 0.5", "lambda=0.5", "λ = 0,5", "lambda = 0,5"]]}
+    },
+    "q37": {
+      "expected_answer": "Pooling gives shift/translation invariance (a CNN is also called a shift invariant artificial neural network). The documents recommend no stride value (stride is only listed as a hyper-parameter to know).",
+      "required_facts": [["invarian*"], ["translation*", "shift*", "decalage*", "deplacement*"]],
+      "support": "weak",
+      "flags": ["Question en partie sans réponse : la partie « valeur de pas (stride) recommandée » ne figure dans aucun des trois PDF (recherche textuelle sur le texte extrait). Les faits requis ne vérifient que la partie répondable ; le champ 'unsupported' repère par mots-clés le signalement de l'absence et les inventions évidentes (faits interdits, nombres absents des passages), de façon approximative : la relecture doit confirmer que l'absence est signalée sans être comblée par une invention."],
+      "unsupported": {"part": "valeur de pas (stride) recommandée", "forbidden_facts": [["stride of 1", "stride 1", "stride = 1", "stride=1", "pas de 1"], ["stride of 2", "stride 2", "stride = 2", "stride=2", "pas de 2"]]}
+    },
+    "q38": {
+      "expected_answer": "Naive Bayes is often rather good at text classification under a bag-of-words model. The documents do not discuss Laplace smoothing.",
+      "required_facts": [["text classification", "classification de texte*", "classification de textes", "classification de documents", "bag-of-words", "bag of words", "sac de mots", "sacs de mots"]],
+      "support": "weak",
+      "flags": ["Question en partie sans réponse : la partie « lissage de Laplace » ne figure dans aucun des trois PDF (recherche textuelle sur le texte extrait). Les faits requis ne vérifient que la partie répondable ; le champ 'unsupported' repère par mots-clés le signalement de l'absence et les inventions évidentes (faits interdits, nombres absents des passages), de façon approximative : la relecture doit confirmer que l'absence est signalée sans être comblée par une invention."],
+      "unsupported": {"part": "lissage de Laplace pour les mots absents", "forbidden_facts": [["add-one", "add one", "pseudo-count*", "pseudocount*", "ajouter 1", "ajout de 1", "alpha = 1", "α = 1"]]}
+    }
+  }
+}

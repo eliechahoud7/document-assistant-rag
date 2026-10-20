@@ -1,0 +1,195 @@
+{
+  "name": "real_v2",
+  "kind": "real",
+  "description": "Deuxième jeu RÉEL (2026-10-20), jeu de test indépendant de real_v1 : mêmes documents (lecture1.pdf, notes CSC_2S004_EP, Polytechnique ; lecture2.pdf et lecture3.pdf, MIT OCW 6.867, Jaakkola), mais questions et citations nouvelles, sur des pages non utilisées par real_v1 sauf trois références (lecture1 p72 pour q22 et q32 : section forêt aléatoire, alors que real_v1 y cite le bagging ; lecture1 p81 pour q28 : GMM, alors que real_v1 y cite le choix de k) ; à ne pas utiliser pour le diagnostic. Catégories : questions simples (paraphrase, cross_lingual, fine_grained, numeric), multi_part_answerable (plusieurs parties, toutes répondables), multi_fact (réponse complète = plusieurs faits ou étapes), multi_passage (preuves sur plusieurs passages), multi_part_partial (une partie répondable, une partie sans réponse : answerable = true, références de la seule partie répondable, partie absente décrite dans les flags de l'annexe), unanswerable_on_topic et unanswerable_off_topic (u09 : la Nouvelle-Zélande n'apparaît que dans une légende de figure). Citations copiées du texte extrait et nettoyé par PypdfLoader, choisies en lisant les pages, sans utiliser le moteur de recherche. Absence des parties sans réponse et des questions u* vérifiée par recherche textuelle dans les trois PDF. Annotation réalisée par l'assistant de développement : à relire par un humain avant d'en tirer des conclusions.",
+  "documents": [
+    {"path": "../documents/lecture1.pdf", "lang": "en"},
+    {"path": "../documents/lecture2.pdf", "lang": "en"},
+    {"path": "../documents/lecture3.pdf", "lang": "en"}
+  ],
+  "questions": [
+    {"id": "q01", "lang": "en", "category": "numeric", "answerable": true,
+     "question": "In the toy example about choosing between the formal and informal French 'you', how much information gain does splitting on the Friend attribute give, compared with splitting on Gender?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 69, "quote": "A much better choice (0.42 > 0.02)!"}]},
+    {"id": "q02", "lang": "fr", "category": "cross_lingual", "answerable": true,
+     "question": "Quelle mesure d'impureté remplace l'entropie quand un arbre de décision doit prédire une variable continue ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 70, "quote": "we can use squared error instead of entropy to measure impurity"}]},
+    {"id": "q03", "lang": "en", "category": "paraphrase", "answerable": true,
+     "question": "Why are decision trees such good candidates for building ensembles of models?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 71, "quote": "decision trees are unstable learners"}]},
+    {"id": "q04", "lang": "fr", "category": "cross_lingual", "answerable": true,
+     "question": "En ACP, quel vecteur choisit-on comme direction de projection quand on ne cherche qu'une seule composante ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 75, "quote": "The solution to Eq. (9.2): take the eigenvector corresponding to the largest eigenvalue"}]},
+    {"id": "q05", "lang": "en", "category": "paraphrase", "answerable": true,
+     "question": "What advantage do autoencoders have over principal component analysis?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 77, "quote": "over OLS: non-linearity"}]},
+    {"id": "q06", "lang": "fr", "category": "fine_grained", "answerable": true,
+     "question": "Pourquoi impose-t-on une norme unité au vecteur de projection w en ACP ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 77, "quote": "project out towards infinity"}]},
+    {"id": "q07", "lang": "en", "category": "paraphrase", "answerable": true,
+     "question": "How are the starting centroids chosen in the k-means procedure described in the course notes?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 80, "quote": "we can start by choosingk-points randomly from our dataset"}]},
+    {"id": "q08", "lang": "fr", "category": "cross_lingual", "answerable": true,
+     "question": "Vers quel type de solution l'algorithme des k-moyennes converge-t-il ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 80, "quote": "Once iterated until convergence we can expect be at a local optimum."}]},
+    {"id": "q09", "lang": "en", "category": "fine_grained", "answerable": true,
+     "question": "Which assumption about the features is responsible for the 'naive' in naive Bayes?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 88, "quote": "indicating feature independence"}]},
+    {"id": "q10", "lang": "fr", "category": "numeric", "answerable": true,
+     "question": "Avec le noyau de chaînes simple du cours, quelle valeur prend la composante associée à « on » pour la séquence « the common construct » ?",
+     "references": [
+       {"filename": "lecture3.pdf", "page": 5, "quote": "(the common construct) = 2"}]},
+    {"id": "q11", "lang": "en", "category": "paraphrase", "answerable": true,
+     "question": "In the weighted gapped substring kernel, what is the role of the parameter lambda?",
+     "references": [
+       {"filename": "lecture3.pdf", "page": 6, "quote": "specifies the penalty for non-contiguous matches"}]},
+    {"id": "q12", "lang": "fr", "category": "cross_lingual", "answerable": true,
+     "question": "Combien de solutions le problème du classifieur linéaire à marge maximale admet-il ?",
+     "references": [
+       {"filename": "lecture2.pdf", "page": 1, "quote": "The solution is unique."}]},
+    {"id": "q13", "lang": "en", "category": "fine_grained", "answerable": true,
+     "question": "When the kernel linear regression objective is extended with an additional constant term, which parameter is deliberately not penalised?",
+     "references": [
+       {"filename": "lecture3.pdf", "page": 6, "quote": "where we have chosen not to regularize θ0"}]},
+    {"id": "q14", "lang": "fr", "category": "paraphrase", "answerable": true,
+     "question": "Quelle propriété essentielle un CNN doit-il à ses couches de pooling ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 60, "quote": "this is obtained using pooling"}]},
+    {"id": "q15", "lang": "en", "category": "numeric", "answerable": true,
+     "question": "With a finite training set of n points and a continuous feature, how many candidate split points does a decision tree have to consider for that feature?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 69, "quote": "there are only finite split points"}]},
+    {"id": "q16", "lang": "fr", "category": "fine_grained", "answerable": true,
+     "question": "En termes de vecteurs de caractéristiques, à quoi correspond la somme de deux noyaux ?",
+     "references": [
+       {"filename": "lecture3.pdf", "page": 4, "quote": "adding kernels, corresponds to just concatenating the feature vectors"}]},
+    {"id": "q17", "lang": "en", "category": "multi_part_answerable", "answerable": true,
+     "question": "Besides entropy, which impurity measure can a classification tree use, and in the vous/tu toy example, which attribute gives the best first split?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 70, "quote": "An alternative measure of impurity to entropy used for classification is Gini impurity"},
+       {"filename": "lecture1.pdf", "page": 69, "quote": "Friend ≤ 0.5"}]},
+    {"id": "q18", "lang": "fr", "category": "multi_part_answerable", "answerable": true,
+     "question": "Quelles valeurs propres l'ACP retient-elle, et lesquelles le clustering spectral retient-il ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 83, "quote": "instead consider thesmallest eigenvalues"},
+       {"filename": "lecture1.pdf", "page": 75, "quote": "The solution to Eq. (9.3): take the eigenvector"}]},
+    {"id": "q19", "lang": "en", "category": "multi_part_answerable", "answerable": true,
+     "question": "What are the two steps that the k-means algorithm alternates between, and what does each step compute?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 80, "quote": "Assign eachxi (for i = 1,...,n ) to the closest cluster"},
+       {"filename": "lecture1.pdf", "page": 80, "quote": "Compute the centroidsμj"}]},
+    {"id": "q20", "lang": "fr", "category": "multi_part_answerable", "answerable": true,
+     "question": "Pourquoi ne peut-on pas appliquer directement le maximum de vraisemblance à un mélange gaussien, et comment l'algorithme EM démarre-t-il ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 94, "quote": "because they are latent"},
+       {"filename": "lecture1.pdf", "page": 94, "quote": "we can just make up some random values first"}]},
+    {"id": "q21", "lang": "en", "category": "multi_part_answerable", "answerable": true,
+     "question": "How does stochastic gradient descent differ from batch gradient descent, and what is the trade-off?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 51, "quote": "we take random samples (we will call them mini-batches)"}]},
+    {"id": "q22", "lang": "fr", "category": "multi_part_answerable", "answerable": true,
+     "question": "Qu'est-ce que la forêt aléatoire ajoute au bagging pour diversifier les arbres, et pourquoi la diversité est-elle facile à obtenir avec des arbres de décision ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 72, "quote": "subset of features when making each split"},
+       {"filename": "lecture1.pdf", "page": 71, "quote": "diversity among trees is easy to obtain"}]},
+    {"id": "q23", "lang": "en", "category": "multi_part_answerable", "answerable": true,
+     "question": "What goes wrong with ordinary least squares when features are collinear, and which approach does the course use to get around it?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 23, "quote": "this is not possible if variables are collinear!"},
+       {"filename": "lecture1.pdf", "page": 23, "quote": "(Section 2.4; via GD"}]},
+    {"id": "q24", "lang": "en", "category": "multi_fact", "answerable": true,
+     "question": "What assumptions does ordinary least squares rely on?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 21, "quote": "1. linearity: the relationship betweenx and y is linear"},
+       {"filename": "lecture1.pdf", "page": 21, "quote": "4. homoskedasticity, i.e.,σ is fixed"}]},
+    {"id": "q25", "lang": "fr", "category": "multi_fact", "answerable": true,
+     "question": "Quelles sont les étapes de la procédure standard d'estimation par maximum de vraisemblance ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 89, "quote": "Write out the likelihood using parametersθ"}]},
+    {"id": "q26", "lang": "en", "category": "multi_fact", "answerable": true,
+     "question": "What are the successive steps of the EM algorithm for a Gaussian mixture model?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 95, "quote": "Until convergence (e.g., until there is almost no change from one step to another):"}]},
+    {"id": "q27", "lang": "fr", "category": "multi_passage", "answerable": true,
+     "question": "Quels sont les trois modes d'une convolution décrits dans le cours, et en quoi diffèrent-ils ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 59, "quote": "At first point of overlap betweenx and w (mode = full)"},
+       {"filename": "lecture1.pdf", "page": 59, "quote": "At first point wherex and w are fully overlapping (mode =valid)"},
+       {"filename": "lecture1.pdf", "page": 60, "quote": "is the same length asx (mode = same)"}]},
+    {"id": "q28", "lang": "en", "category": "multi_passage", "answerable": true,
+     "question": "How is k-means clustering related to the EM algorithm for Gaussian mixtures?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 96, "quote": "The algorithm becomes ‘Maximization Maximization’"},
+       {"filename": "lecture1.pdf", "page": 81, "quote": "using a ‘soft’ version of thek-means algorithm"}]},
+    {"id": "q29", "lang": "fr", "category": "multi_passage", "answerable": true,
+     "question": "Qu'est-ce qu'un modèle de mélange gaussien apporte de plus que les k-moyennes pour le clustering ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 82, "quote": "a GMM also gives us a shape (covariance"},
+       {"filename": "lecture1.pdf", "page": 95, "quote": "we also have a probability"}]},
+    {"id": "q30", "lang": "en", "category": "multi_passage", "answerable": true,
+     "question": "Which assumption makes naive Bayes naive, and how does Gaussian Bayes remove it?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 88, "quote": "due to its naive assumption of independence among features"},
+       {"filename": "lecture1.pdf", "page": 92, "quote": "We can overcome the independence assumption by including co-variance"}]},
+    {"id": "q31", "lang": "fr", "category": "multi_passage", "answerable": true,
+     "question": "Que suppose la méthode des moindres carrés sur la distribution des erreurs, et qu'en est-il des k plus proches voisins ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 21, "quote": "5. the irreducible error has mean0, and is Gaussian-distributed"},
+       {"filename": "lecture1.pdf", "page": 24, "quote": "no assumption on distribution of errors"}]},
+    {"id": "q32", "lang": "en", "category": "multi_part_partial", "answerable": true,
+     "question": "How does a random forest make its trees differ from one another, and how many trees does the course recommend using?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 72, "quote": "the method of random forest considers a random"}]},
+    {"id": "q33", "lang": "fr", "category": "multi_part_partial", "answerable": true,
+     "question": "Sur quelle cible un autoencodeur est-il entraîné, et qui a inventé les autoencodeurs ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 77, "quote": "trained to predict their own inputs"}]},
+    {"id": "q34", "lang": "en", "category": "multi_part_partial", "answerable": true,
+     "question": "Outside machine learning, what is the Gini coefficient commonly used to measure, and in what year was it first published?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 70, "quote": "commonly used to measure income inequality"}]},
+    {"id": "q35", "lang": "fr", "category": "multi_part_partial", "answerable": true,
+     "question": "Comment les k-moyennes sortent-elles du problème de l'œuf et de la poule entre affectations et centroïdes, et quelle est la complexité temporelle de l'algorithme ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 80, "quote": "To break this chicken-and-egg problem, we set one set of parameters randomly"}]},
+    {"id": "q36", "lang": "en", "category": "multi_part_partial", "answerable": true,
+     "question": "In the weighted gapped substring kernel, what values can lambda take, and which value is recommended in practice?",
+     "references": [
+       {"filename": "lecture3.pdf", "page": 6, "quote": "where the parameter λ ∈ (0, 1)"}]},
+    {"id": "q37", "lang": "fr", "category": "multi_part_partial", "answerable": true,
+     "question": "Quelle propriété les couches de pooling apportent-elles à un CNN, et quelle valeur de pas (stride) le cours recommande-t-il ?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 60, "quote": "shift invariant artificial neural network"}]},
+    {"id": "q38", "lang": "en", "category": "multi_part_partial", "answerable": true,
+     "question": "For which kind of task does the course say naive Bayes works rather well, and how should Laplace smoothing be applied to unseen words?",
+     "references": [
+       {"filename": "lecture1.pdf", "page": 88, "quote": "under a bag-of-words model"}]},
+    {"id": "u01", "lang": "en", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "Which learning-rate schedule does the course recommend when training a CNN with SGD?"},
+    {"id": "u02", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "Quelle est la complexité temporelle de la construction d'un arbre de décision ?"},
+    {"id": "u03", "lang": "en", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "How does the XGBoost library implement gradient boosting?"},
+    {"id": "u04", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "Comment fonctionne l'algorithme de clustering DBSCAN ?"},
+    {"id": "u05", "lang": "en", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "How does a GRU cell differ from an LSTM cell?"},
+    {"id": "u06", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "Qui a inventé l'analyse en composantes principales ?"},
+    {"id": "u07", "lang": "en", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "How does t-SNE differ from PCA for visualising high-dimensional data?"},
+    {"id": "u08", "lang": "fr", "category": "unanswerable_on_topic", "answerable": false,
+     "question": "Quelle différence y a-t-il entre l'algorithme de Lloyd et celui de Hartigan pour les k-moyennes ?"},
+    {"id": "u09", "lang": "en", "category": "unanswerable_off_topic", "answerable": false,
+     "question": "What is the capital city of New Zealand?"}
+  ]
+}
