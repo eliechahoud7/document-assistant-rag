@@ -27,6 +27,7 @@ from doc_assistant.domain.errors import (
     LLMResponseError,
     LLMTimeoutError,
     LLMUnavailableError,
+    TranslationModelNotFoundError,
 )
 from doc_assistant.domain.models import Answer
 from doc_assistant.domain.ports import Embedder
@@ -111,6 +112,10 @@ def _embedding_key(settings: Settings) -> str:
             settings.embedding_model_revision,
             settings.embedding_device,
             settings.embedding_batch_size,
+            # La traduction des requêtes enveloppe l'embedder : elle fait partie de la clé.
+            settings.query_translation,
+            settings.translation_model,
+            settings.translation_model_revision,
         )
     )
 
@@ -146,7 +151,12 @@ def load_service(settings: Settings) -> QAService:
         )
     try:
         return _cached_qa_service(repr(settings), settings)
-    except (EmbeddingModelNotFoundError, EmbeddingModelMismatchError, LLMError) as exc:
+    except (
+        EmbeddingModelNotFoundError,
+        EmbeddingModelMismatchError,
+        TranslationModelNotFoundError,
+        LLMError,
+    ) as exc:
         raise SetupError(str(exc)) from exc
 
 

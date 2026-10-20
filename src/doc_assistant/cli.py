@@ -18,6 +18,7 @@ from doc_assistant.domain.errors import (
     EmbeddingModelNotFoundError,
     IngestionError,
     LLMError,
+    TranslationModelNotFoundError,
 )
 from doc_assistant.domain.ports import Embedder
 from doc_assistant.evaluation.dataset import load_dataset
@@ -36,7 +37,10 @@ from doc_assistant.evaluation.runner import (
     index_dataset,
     run_evaluation,
 )
-from doc_assistant.indexing.model_download import download_embedding_model
+from doc_assistant.indexing.model_download import (
+    download_embedding_model,
+    download_translation_model,
+)
 from doc_assistant.indexing.vector_store import ChromaVectorStore
 from doc_assistant.ingestion.chunking import RecursiveChunker
 from doc_assistant.ingestion.pdf_loader import PypdfLoader
@@ -60,6 +64,27 @@ def _download(settings: Settings, _args: argparse.Namespace) -> int:
     target = download_embedding_model(settings)
     print(f"Modèle prêt : {target}")
     return 0
+
+
+def _download_translation(settings: Settings, _args: argparse.Namespace) -> int:
+    revision = settings.translation_model_revision[:8]
+    print(f"Téléchargement de {settings.translation_model} ({revision})")
+    print(f"vers {settings.translation_model_dir} ...")
+    target = download_translation_model(settings)
+    print(f"Modèle de traduction prêt : {target}")
+    return 0
+
+
+def _translation_config(settings: Settings) -> dict[str, str]:
+    """Clés de configuration de la traduction, absentes quand elle est désactivée : les
+    rapports et enregistrements produits sans traduction restent identiques aux anciens."""
+    if settings.query_translation == "none":
+        return {}
+    return {
+        "query_translation": settings.query_translation,
+        "translation_model": settings.translation_model,
+        "translation_model_revision": settings.translation_model_revision,
+    }
 
 
 def _index(settings: Settings, args: argparse.Namespace) -> int:
@@ -178,7 +203,8 @@ def _evaluate(settings: Settings, args: argparse.Namespace) -> int:
             "embedding_model_revision": settings.embedding_model_revision,
             "chunk_size": settings.chunk_size,
             "chunk_overlap": settings.chunk_overlap,
-        },
+        }
+        | _translation_config(settings),
     )
     print(format_summary(report))
     if args.output:
@@ -212,6 +238,7 @@ def _generate_answers(settings: Settings, args: argparse.Namespace) -> int:
     if settings.context_neighbors:
         # Absent à 0 : les enregistrements d'origine gardent une configuration comparable.
         run_config["context_neighbors"] = settings.context_neighbors
+    run_config |= _translation_config(settings)
     target = f"{settings.llm_provider} ({generator.model_name})"
     print(f"Envoi des passages à {target} ; sortie : {args.output}")
     with _temporary_store(embedder) as store:
@@ -271,6 +298,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     download = commands.add_parser("download-model", help="télécharge le modèle d'embeddings")
     download.set_defaults(handler=_download)
+
+    download_translation = commands.add_parser(
+        "download-translation-model",
+        help="télécharge le modèle de traduction FR->EN des requêtes (facultatif)",
+    )
+    download_translation.set_defaults(handler=_download_translation)
 
     index = commands.add_parser("index", help="indexe des PDF (fichiers ou dossiers)")
     index.add_argument("paths", nargs="+", type=Path)
@@ -336,6 +369,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         ConfigError,
         EmbeddingModelNotFoundError,
         EmbeddingModelMismatchError,
+        TranslationModelNotFoundError,
         IngestionError,
         LLMError,
         FileNotFoundError,

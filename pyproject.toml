@@ -34,6 +34,12 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.11",
 ]
+# Traduction FR -> EN des requêtes (DOCASSIST_QUERY_TRANSLATION=fr-en, désactivée par défaut) :
+# tokenizer du modèle Opus-MT. Modèle : python -m doc_assistant download-translation-model
+translation = [
+    "sentencepiece>=0.2.2,<0.3",
+    "sacremoses>=0.2,<0.3",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

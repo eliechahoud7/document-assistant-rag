@@ -19,7 +19,11 @@ from streamlit.testing.v1 import AppTest
 from conftest import NetworkAccessError
 from doc_assistant import bootstrap
 from doc_assistant.config import Settings
-from doc_assistant.domain.errors import LLMConfigurationError, LLMQuotaError
+from doc_assistant.domain.errors import (
+    LLMConfigurationError,
+    LLMQuotaError,
+    TranslationModelNotFoundError,
+)
 from doc_assistant.domain.models import Chunk
 from doc_assistant.domain.ports import AnswerGenerator, Embedder
 from doc_assistant.retrieval.retriever import Retriever
@@ -37,8 +41,11 @@ class Pipeline:
         self.script = script
         self.built_for: list[Path] = []
         self.generator_error: Exception | None = None
+        self.embedder_error: Exception | None = None
 
     def build_embedder(self, _settings: Settings) -> Embedder:
+        if self.embedder_error is not None:
+            raise self.embedder_error
         return FakeEmbedder()
 
     def build_generator(self, _settings: Settings) -> AnswerGenerator:
@@ -183,3 +190,15 @@ def test_missing_index_is_never_created(pipeline: Pipeline, tmp_path: Path) -> N
     assert "index introuvable" in app.error[0].value
     assert not (tmp_path / "data" / "courses" / "chroma" / "chroma.sqlite3").exists()
     assert pipeline.built_for == [Path("data")]
+
+
+def test_missing_translation_model_is_a_clear_setup_error(pipeline: Pipeline) -> None:
+    pipeline.embedder_error = TranslationModelNotFoundError(
+        "modèle de traduction introuvable dans models/opus-mt-fr-en"
+    )
+
+    app = start()
+
+    assert "modèle de traduction introuvable" in app.error[0].value
+    assert "erreur inattendue" not in app.error[0].value
+    assert app.chat_input[0].disabled

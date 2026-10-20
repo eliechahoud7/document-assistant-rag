@@ -17,6 +17,8 @@ ENV_PREFIX = "DOCASSIST_"
 
 LLMProvider = Literal["none", "gemini", "ollama", "anthropic"]
 _LLM_PROVIDERS: tuple[str, ...] = ("none", "gemini", "ollama", "anthropic")
+QueryTranslation = Literal["none", "fr-en"]
+_QUERY_TRANSLATIONS: tuple[str, ...] = ("none", "fr-en")
 _LOG_LEVELS: tuple[str, ...] = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 # Contrainte de ChromaDB sur les noms de collection.
 _COLLECTION_NAME_RE = re.compile(r"[a-zA-Z0-9][a-zA-Z0-9._-]{1,510}[a-zA-Z0-9]")
@@ -50,6 +52,11 @@ class Settings:
     # Chunks voisins ajoutés au contexte du LLM (1 = configuration retenue après E6a, ADR 0008 ;
     # 0 = contexte réduit au top-k, comportement du run de référence).
     context_neighbors: int = 1
+    # Traduction des questions françaises vers l'anglais, pour la recherche uniquement
+    # ("none" par défaut : comportement inchangé). Modèle local, révision figée.
+    query_translation: QueryTranslation = "none"
+    translation_model: str = "Helsinki-NLP/opus-mt-fr-en"
+    translation_model_revision: str = "c4aed37b318c763fd177aa449b44e3b783cc6c02"
 
     def __post_init__(self) -> None:
         if not 0 <= self.context_neighbors <= 3:
@@ -83,6 +90,13 @@ class Settings:
             raise ConfigError("chunk_overlap doit vérifier 0 <= chunk_overlap < chunk_size")
         if self.retrieval_top_k <= 0:
             raise ConfigError("retrieval_top_k doit être strictement positif")
+        if self.query_translation not in _QUERY_TRANSLATIONS:
+            raise ConfigError(
+                f"query_translation doit être parmi {_QUERY_TRANSLATIONS}, "
+                f"reçu {self.query_translation!r}"
+            )
+        if not self.translation_model:
+            raise ConfigError("translation_model ne peut pas être vide")
 
     @property
     def chroma_dir(self) -> Path:
@@ -96,6 +110,11 @@ class Settings:
     def embedding_model_dir(self) -> Path:
         """Dossier local du modèle : ``models/multilingual-e5-small`` par défaut."""
         return self.models_dir / self.embedding_model.rsplit("/", 1)[-1]
+
+    @property
+    def translation_model_dir(self) -> Path:
+        """Dossier local du modèle de traduction : ``models/opus-mt-fr-en`` par défaut."""
+        return self.models_dir / self.translation_model.rsplit("/", 1)[-1]
 
     @classmethod
     def from_env(cls, environ: Mapping[str, str] | None = None) -> Settings:
@@ -133,4 +152,11 @@ class Settings:
             chunk_overlap=get_int("CHUNK_OVERLAP", defaults.chunk_overlap),
             retrieval_top_k=get_int("RETRIEVAL_TOP_K", defaults.retrieval_top_k),
             context_neighbors=get_int("CONTEXT_NEIGHBORS", defaults.context_neighbors),
+            query_translation=cast(
+                QueryTranslation, get("QUERY_TRANSLATION", defaults.query_translation).lower()
+            ),
+            translation_model=get("TRANSLATION_MODEL", defaults.translation_model),
+            translation_model_revision=get(
+                "TRANSLATION_MODEL_REVISION", defaults.translation_model_revision
+            ),
         )

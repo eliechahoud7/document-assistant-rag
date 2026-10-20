@@ -21,6 +21,14 @@ class EmbeddingModelMismatchError(Exception):
     """L'index a été construit avec un autre modèle d'embeddings (vecteurs incompatibles)."""
 
 
+class TranslationModelNotFoundError(Exception):
+    """La traduction des requêtes est activée mais son modèle n'est pas présent localement."""
+
+
+class TranslationError(Exception):
+    """La traduction d'une requête a échoué (la requête d'origine est alors utilisée)."""
+
+
 class LLMError(Exception):
     """Erreur liée à la génération de réponses par un LLM."""
 

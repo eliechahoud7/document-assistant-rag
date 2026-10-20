@@ -65,6 +65,17 @@ class VectorStore(Protocol):
     def count(self) -> int: ...
 
 
+class QueryTranslator(Protocol):
+    """Traduit une requête vers la langue des documents, pour la recherche uniquement."""
+
+    @property
+    def model_name(self) -> str: ...
+
+    def translate(self, text: str) -> str:
+        """Renvoie la traduction ; lève ``TranslationError`` en cas d'échec."""
+        ...
+
+
 class AnswerGenerator(Protocol):
     """Rédige une réponse fondée uniquement sur les passages fournis, ou s'abstient."""
 

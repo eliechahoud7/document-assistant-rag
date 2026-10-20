@@ -15,7 +15,15 @@ from doc_assistant.services.qa_service import QAService
 
 
 def build_embedder(settings: Settings) -> Embedder:
-    return E5Embedder.from_settings(settings)
+    """Embedder E5 ; enveloppé d'une traduction des requêtes si elle est activée."""
+    embedder = E5Embedder.from_settings(settings)
+    if settings.query_translation == "none":
+        return embedder
+    from doc_assistant.retrieval.marian_translator import MarianTranslator
+    from doc_assistant.retrieval.query_translation import TranslatingEmbedder
+
+    # Modèle absent : TranslationModelNotFoundError dès la construction, avant toute requête.
+    return TranslatingEmbedder(embedder, MarianTranslator.from_settings(settings))
 
 
 def build_store(settings: Settings, embedder: Embedder) -> ChromaVectorStore:
