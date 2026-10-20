@@ -1,7 +1,7 @@
 {
   "name": "real_v2",
   "kind": "real",
-  "description": "Deuxième jeu RÉEL (2026-10-20), jeu de test indépendant de real_v1 : mêmes documents (lecture1.pdf, notes CSC_2S004_EP, Polytechnique ; lecture2.pdf et lecture3.pdf, MIT OCW 6.867, Jaakkola), mais questions et citations nouvelles, sur des pages non utilisées par real_v1 sauf trois références (lecture1 p72 pour q22 et q32 : section forêt aléatoire, alors que real_v1 y cite le bagging ; lecture1 p81 pour q28 : GMM, alors que real_v1 y cite le choix de k) ; à ne pas utiliser pour le diagnostic. Catégories : questions simples (paraphrase, cross_lingual, fine_grained, numeric), multi_part_answerable (plusieurs parties, toutes répondables), multi_fact (réponse complète = plusieurs faits ou étapes), multi_passage (preuves sur plusieurs passages), multi_part_partial (une partie répondable, une partie sans réponse : answerable = true, références de la seule partie répondable, partie absente décrite dans les flags de l'annexe), unanswerable_on_topic et unanswerable_off_topic (u09 : la Nouvelle-Zélande n'apparaît que dans une légende de figure). Citations copiées du texte extrait et nettoyé par PypdfLoader, choisies en lisant les pages, sans utiliser le moteur de recherche. Absence des parties sans réponse et des questions u* vérifiée par recherche textuelle dans les trois PDF. Annotation réalisée par l'assistant de développement : à relire par un humain avant d'en tirer des conclusions.",
+  "description": "Deuxième jeu RÉEL (2026-10-20), jeu de test indépendant de real_v1 : mêmes documents (lecture1.pdf, notes CSC_2S004_EP, Polytechnique ; lecture2.pdf et lecture3.pdf, MIT OCW 6.867, Jaakkola), mais questions et citations nouvelles, sur des pages non utilisées par real_v1 sauf trois références (lecture1 p72 pour q22 et q32 : section forêt aléatoire, alors que real_v1 y cite le bagging ; lecture1 p81 pour q28 : GMM, alors que real_v1 y cite le choix de k) ; à ne pas utiliser pour le diagnostic. Catégories : questions simples (paraphrase, cross_lingual, fine_grained, numeric), multi_part_answerable (plusieurs parties, toutes répondables), multi_fact (réponse complète = plusieurs faits ou étapes), multi_passage (preuves sur plusieurs passages), multi_part_partial (une partie répondable, une partie sans réponse : answerable = true, références de la seule partie répondable, partie absente décrite dans les flags de l'annexe), unanswerable_on_topic et unanswerable_off_topic (u09 : la Nouvelle-Zélande n'apparaît que dans une légende de figure). Citations copiées du texte extrait et nettoyé par PypdfLoader, choisies en lisant les pages, sans utiliser le moteur de recherche. Absence des parties sans réponse et des questions u* vérifiée par recherche textuelle dans les trois PDF. Annotation réalisée par l'assistant de développement : à relire par un humain avant d'en tirer des conclusions. Révision 1 (2026-10-20) : références ajoutées (aucune retirée, questions et réponses attendues inchangées) selon le critère « le passage, lu seul, répond à la question ou à l'une de ses parties », après lecture des chunks retrouvés lors du diagnostic : q04 (lecture1 p76), q09 (p88, p91), q20 (p95, partie « démarrage d'EM »), q21 (p51, partie « compromis »), q33 (p77).",
   "documents": [
     {"path": "../documents/lecture1.pdf", "lang": "en"},
     {"path": "../documents/lecture2.pdf", "lang": "en"},
@@ -23,7 +23,8 @@
     {"id": "q04", "lang": "fr", "category": "cross_lingual", "answerable": true,
      "question": "En ACP, quel vecteur choisit-on comme direction de projection quand on ne cherche qu'une seule composante ?",
      "references": [
-       {"filename": "lecture1.pdf", "page": 75, "quote": "The solution to Eq. (9.2): take the eigenvector corresponding to the largest eigenvalue"}]},
+       {"filename": "lecture1.pdf", "page": 75, "quote": "The solution to Eq. (9.2): take the eigenvector corresponding to the largest eigenvalue"},
+       {"filename": "lecture1.pdf", "page": 76, "quote": "This is exactly the line pointing along the direction ofu1 corresponding\nto largest eigenvalue"}]},
     {"id": "q05", "lang": "en", "category": "paraphrase", "answerable": true,
      "question": "What advantage do autoencoders have over principal component analysis?",
      "references": [
@@ -43,7 +44,9 @@
     {"id": "q09", "lang": "en", "category": "fine_grained", "answerable": true,
      "question": "Which assumption about the features is responsible for the 'naive' in naive Bayes?",
      "references": [
-       {"filename": "lecture1.pdf", "page": 88, "quote": "indicating feature independence"}]},
+       {"filename": "lecture1.pdf", "page": 88, "quote": "indicating feature independence"},
+       {"filename": "lecture1.pdf", "page": 88, "quote": "due to its naive assumption of independence among features"},
+       {"filename": "lecture1.pdf", "page": 91, "quote": "Note that the independence assumption of Naive Bayes implies that we can write"}]},
     {"id": "q10", "lang": "fr", "category": "numeric", "answerable": true,
      "question": "Avec le noyau de chaînes simple du cours, quelle valeur prend la composante associée à « on » pour la séquence « the common construct » ?",
      "references": [
@@ -91,11 +94,13 @@
      "question": "Pourquoi ne peut-on pas appliquer directement le maximum de vraisemblance à un mélange gaussien, et comment l'algorithme EM démarre-t-il ?",
      "references": [
        {"filename": "lecture1.pdf", "page": 94, "quote": "because they are latent"},
-       {"filename": "lecture1.pdf", "page": 94, "quote": "we can just make up some random values first"}]},
+       {"filename": "lecture1.pdf", "page": 94, "quote": "we can just make up some random values first"},
+       {"filename": "lecture1.pdf", "page": 95, "quote": "Initialize parameter values"}]},
     {"id": "q21", "lang": "en", "category": "multi_part_answerable", "answerable": true,
      "question": "How does stochastic gradient descent differ from batch gradient descent, and what is the trade-off?",
      "references": [
-       {"filename": "lecture1.pdf", "page": 51, "quote": "we take random samples (we will call them mini-batches)"}]},
+       {"filename": "lecture1.pdf", "page": 51, "quote": "we take random samples (we will call them mini-batches)"},
+       {"filename": "lecture1.pdf", "page": 51, "quote": "A larger number of iterations is required, wrt batch gradient descent"}]},
     {"id": "q22", "lang": "fr", "category": "multi_part_answerable", "answerable": true,
      "question": "Qu'est-ce que la forêt aléatoire ajoute au bagging pour diversifier les arbres, et pourquoi la diversité est-elle facile à obtenir avec des arbres de décision ?",
      "references": [
@@ -152,7 +157,8 @@
     {"id": "q33", "lang": "fr", "category": "multi_part_partial", "answerable": true,
      "question": "Sur quelle cible un autoencodeur est-il entraîné, et qui a inventé les autoencodeurs ?",
      "references": [
-       {"filename": "lecture1.pdf", "page": 77, "quote": "trained to predict their own inputs"}]},
+       {"filename": "lecture1.pdf", "page": 77, "quote": "trained to predict their own inputs"},
+       {"filename": "lecture1.pdf", "page": 77, "quote": "So the only difference is their selection of output (being equal to the input)"}]},
     {"id": "q34", "lang": "en", "category": "multi_part_partial", "answerable": true,
      "question": "Outside machine learning, what is the Gini coefficient commonly used to measure, and in what year was it first published?",
      "references": [
