@@ -97,6 +97,9 @@ automatiquement : définissez les variables dans la session PowerShell).
 | `GEMINI_API_KEY` | — | clé API, lue uniquement dans l'environnement, jamais affichée ni enregistrée |
 | `DOCASSIST_QUERY_TRANSLATION` | `none` | `fr-en` : traduit les questions françaises pour la recherche uniquement (expérimental, voir [Résultats](#expérience--traduction-fr--en-des-requêtes-et-fusion-rrf-real_v2)) |
 | `DOCASSIST_APP_UPLOADS` | `true` | ajout et suppression de documents depuis l'interface web ; `false` pour une bibliothèque en lecture seule (déploiement public) |
+| `DOCASSIST_MODEL_AUTO_DOWNLOAD` | `false` | `true` : télécharge le modèle d'embeddings au premier démarrage s'il est absent (déploiement) |
+| `DOCASSIST_DEMO_DOCS_DIR` | — | mode démonstration : PDF publics indexés au démarrage ; ajout et suppression toujours désactivés (voir [Déploiement](#déploiement-streamlit-community-cloud)) |
+
 ## Exemple (tiré d'un enregistrement existant)
 
 Réponses réelles extraites de
@@ -255,7 +258,8 @@ Remove-Item Env:DOCASSIST_QUERY_TRANSLATION
 ## Hors périmètre de cette version
 
 Inclus : une interface web Streamlit ([`app.py`](app.py),
-`.\.venv\Scripts\python.exe -m streamlit run app.py`) qui travaille sur une seule bibliothèque :
+`.\.venv\Scripts\python.exe -m streamlit run app.py --server.address localhost` ; l'option
+limite l'accès à votre machine) qui travaille sur une seule bibliothèque :
 l'index de `DOCASSIST_DATA_DIR` (`data` par défaut), le même que celui des commandes `index`,
 `search` et `ask`. La section « Mes documents » liste les PDF indexés (nom, pages, passages, date
 d'ajout, état), y compris ceux indexés avec la CLI, et persiste entre les sessions grâce au
@@ -320,9 +324,44 @@ docs/              # architecture et ADR 0001 à 0008
 Une fixture bloque toute connexion réseau pendant les tests ; la génération y est simulée par des
 générateurs factices. Le test réel Gemini (`-m llm`) n'est jamais sélectionné par défaut.
 
+## Déploiement (Streamlit Community Cloud)
+
+> **Avant toute mise en ligne publique** : selon les conditions de l'API Gemini, rendre l'outil
+> accessible à des utilisateurs de l'EEE, de la Suisse ou du Royaume-Uni exige l'offre payante
+> ([ADR 0006](docs/adr/0006-generation-gemini.md)). Vérifiez les conditions en vigueur.
+
+Fichiers utilisés : [`requirements.txt`](requirements.txt) (installe le projet et PyTorch
+**CPU** `torch==2.14.1+cpu`, sans paquet NVIDIA), [`.streamlit/config.toml`](.streamlit/config.toml)
+(sans adresse d'écoute : en local, gardez `--server.address localhost`) et
+[`demo/documents/`](demo/documents/SOURCES.md) (seuls PDF publiés : cours MIT OCW sous
+CC BY-NC-SA 4.0). Ni `data/` (index, CV, registre), ni `models/`, ni `.env`, ni
+`.streamlit/secrets.toml` ne sont versionnés.
+
+1. Poussez la branche sur GitHub, puis sur share.streamlit.io : *Create app*, dépôt, branche,
+   fichier `app.py` ; dans *Advanced settings*, choisissez **Python 3.13**.
+2. Dans *Secrets*, définissez (clés au premier niveau : elles deviennent des variables
+   d'environnement) :
+
+   ```toml
+   GEMINI_API_KEY = "..."
+   DOCASSIST_LLM_PROVIDER = "gemini"
+   DOCASSIST_MODEL_AUTO_DOWNLOAD = "true"
+   DOCASSIST_DEMO_DOCS_DIR = "demo/documents"
+   DOCASSIST_APP_UPLOADS = "false"
+   ```
+
+3. Premier démarrage : installation des dépendances, téléchargement du modèle (~493 Mo), puis
+   indexation des PDF de démonstration. Le disque du cloud est temporaire : après une mise en
+   veille, le modèle est retéléchargé et les documents réindexés automatiquement.
+
+En mode démonstration, l'ajout et la suppression de documents sont toujours désactivés, même si
+`DOCASSIST_APP_UPLOADS` vaut `true`.
+
 ## Sources des documents d'évaluation et licences
 
-Les PDF d'évaluation ne sont **pas** inclus dans le dépôt (`evaluation/documents/` est ignoré).
+Les PDF d'évaluation ne sont **pas** inclus dans le dépôt (`evaluation/documents/` est ignoré),
+à l'exception de copies non modifiées de `lecture2.pdf` et `lecture3.pdf` dans
+`demo/documents/` pour la démonstration (attribution : [`SOURCES.md`](demo/documents/SOURCES.md)).
 Les jeux d'évaluation, l'annexe de réponses, les rapports et les fiches de relecture contiennent
 de **courts extraits** de ces documents :
 

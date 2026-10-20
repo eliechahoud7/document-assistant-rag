@@ -14,6 +14,7 @@ import os
 from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal
 
 import streamlit as st
@@ -37,6 +38,7 @@ from doc_assistant.domain.errors import (
 )
 from doc_assistant.domain.models import Answer
 from doc_assistant.domain.ports import Embedder
+from doc_assistant.indexing import model_download
 from doc_assistant.services.library_service import DocumentLibrary, LibraryEntry
 from doc_assistant.services.qa_service import QAService
 from doc_assistant.services.upload_service import MAX_UPLOAD_BYTES
@@ -46,6 +48,12 @@ logger = logging.getLogger("doc_assistant.app")
 # Gestion des documents (ajout et suppression) depuis l'interface : à désactiver pour un
 # déploiement public, où tout visiteur pourrait sinon modifier la bibliothèque.
 APP_UPLOADS_ENV = "DOCASSIST_APP_UPLOADS"
+# Déploiement (Streamlit Community Cloud) ; inactifs par défaut en local.
+# Téléchargement du modèle d'embeddings au premier démarrage s'il est absent.
+MODEL_AUTO_DOWNLOAD_ENV = "DOCASSIST_MODEL_AUTO_DOWNLOAD"
+# Mode démonstration : dossier de PDF publics indexés au démarrage ; ajout et suppression
+# toujours désactivés.
+DEMO_DOCS_ENV = "DOCASSIST_DEMO_DOCS_DIR"
 _TRUE, _FALSE = ("1", "true", "yes", "on"), ("0", "false", "no", "off")
 
 # Messages destinés à l'utilisateur, sans détail technique (fournisseur, modèle, variables) :
@@ -116,11 +124,31 @@ class Notice:
 # ---------------------------------------------------------------- pipeline
 
 
-def uploads_enabled(environ: Mapping[str, str]) -> bool:
-    raw = environ.get(APP_UPLOADS_ENV, "true").strip().lower()
+def _flag(environ: Mapping[str, str], name: str, default: bool) -> bool:
+    raw = environ.get(name, "true" if default else "false").strip().lower()
     if raw not in _TRUE + _FALSE:
-        raise ConfigError(f"{APP_UPLOADS_ENV} doit valoir true ou false, reçu {raw!r}")
+        raise ConfigError(f"{name} doit valoir true ou false, reçu {raw!r}")
     return raw in _TRUE
+
+
+def demo_documents_dir(environ: Mapping[str, str]) -> Path | None:
+    """Dossier des documents de démonstration ; ``None`` hors mode démonstration."""
+    raw = environ.get(DEMO_DOCS_ENV, "").strip()
+    return Path(raw) if raw else None
+
+
+def uploads_enabled(environ: Mapping[str, str]) -> bool:
+    """Ajout et suppression depuis l'interface ; toujours désactivés en mode démonstration."""
+    enabled = _flag(environ, APP_UPLOADS_ENV, default=True)
+    if demo_documents_dir(environ) is None:
+        return enabled
+    if APP_UPLOADS_ENV in environ and enabled:
+        logger.warning("%s ignoré : mode démonstration (%s)", APP_UPLOADS_ENV, DEMO_DOCS_ENV)
+    return False
+
+
+def model_auto_download(environ: Mapping[str, str]) -> bool:
+    return _flag(environ, MODEL_AUTO_DOWNLOAD_ENV, default=False)
 
 
 def _embedding_key(settings: Settings) -> str:
@@ -141,8 +169,16 @@ def _embedding_key(settings: Settings) -> str:
 
 @st.cache_resource(show_spinner=False)
 def _cached_embedder(cache_key: str, _settings: Settings) -> Embedder:
-    """Modèle E5 chargé une seule fois, partagé par la recherche et l'indexation."""
+    """Modèle E5 chargé une seule fois, partagé par la recherche et l'indexation.
+
+    Avec ``DOCASSIST_MODEL_AUTO_DOWNLOAD=true`` (cloud), un modèle absent est d'abord téléchargé
+    (révision figée, fichiers nécessaires seulement) ; l'embedder reste ensuite hors ligne.
+    """
     del cache_key  # sert uniquement de clé de cache
+    weights = _settings.embedding_model_dir / "model.safetensors"
+    if model_auto_download(os.environ) and not weights.is_file():
+        logger.info("modèle d'embeddings absent : téléchargement de %s", _settings.embedding_model)
+        model_download.download_embedding_model(_settings)
     return bootstrap.build_embedder(_settings)
 
 
@@ -208,6 +244,33 @@ def get_library(settings: Settings, *, create: bool) -> DocumentLibrary | None:
         TranslationModelNotFoundError,
     ) as exc:
         raise SetupError(str(exc)) from exc
+
+
+@st.cache_resource(show_spinner=False, max_entries=4)
+def _seed_demo_documents(cache_key: str, _settings: Settings, _folder: Path) -> int:
+    """Indexe les PDF de démonstration, une fois par processus, avec le pipeline d'envoi
+    (même déduplication par SHA-256 : un document déjà présent n'est pas réindexé)."""
+    del cache_key
+    pdfs = sorted(_folder.glob("*.pdf")) if _folder.is_dir() else []
+    if not pdfs:
+        logger.error("aucun PDF de démonstration dans %s", _folder)
+        return 0
+    library = get_library(_settings, create=True)
+    assert library is not None
+    indexed = 0
+    for pdf in pdfs:
+        try:
+            outcome = library.add(pdf.name, pdf.read_bytes())
+        except (IngestionError, DocumentRegistryError) as exc:
+            logger.error("document de démonstration ignoré : %s", exc)
+            continue
+        indexed += outcome.kind == "indexed"
+    logger.info("démonstration : %d PDF, %d nouvellement indexé(s)", len(pdfs), indexed)
+    return indexed
+
+
+def seed_demo_documents(settings: Settings, folder: Path) -> None:
+    _seed_demo_documents(repr((settings, folder)), settings, folder)
 
 
 def list_documents(library: DocumentLibrary) -> tuple[list[LibraryEntry], str]:
@@ -600,15 +663,19 @@ def main() -> None:
 
     try:
         settings, manage = Settings.from_env(), uploads_enabled(os.environ)
+        model_auto_download(os.environ)  # valeur vérifiée dès le démarrage
     except ConfigError as exc:
         st.error(f"**Configuration invalide** — {exc}")
         return
+    demo_dir = demo_documents_dir(os.environ)
 
     entries: list[LibraryEntry] = []
     warning = library_error = setup_error = ""
     service: QAService | None = None
     try:
         with st.spinner("Chargement de vos documents…"):
+            if demo_dir is not None:
+                seed_demo_documents(settings, demo_dir)
             library = get_library(settings, create=False)
             if library is not None:
                 entries, warning = list_documents(library)

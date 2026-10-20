@@ -29,6 +29,7 @@ from doc_assistant.domain.errors import (
 )
 from doc_assistant.domain.models import Answer, Chunk, SearchResult
 from doc_assistant.domain.ports import AnswerGenerator, Embedder
+from doc_assistant.indexing import model_download
 from doc_assistant.indexing.document_registry import DocumentRegistry
 from doc_assistant.ingestion.chunking import RecursiveChunker
 from doc_assistant.ingestion.pdf_loader import PypdfLoader
@@ -131,6 +132,8 @@ def pipeline(
         "DOCASSIST_LLM_PROVIDER",
         "GEMINI_API_KEY",
         "DOCASSIST_APP_UPLOADS",
+        "DOCASSIST_DEMO_DOCS_DIR",
+        "DOCASSIST_MODEL_AUTO_DOWNLOAD",
     ):
         monkeypatch.delenv(name, raising=False)
     fake = Pipeline({"Que font les chats ?": "Ils dorment [1].", "Inconnu ?": "abstain"})
@@ -780,3 +783,135 @@ def test_scroll_helper_is_hidden_from_the_layout() -> None:
     source = APP.read_text(encoding="utf-8")
 
     assert '[data-testid="stElementContainer"]:has(.docassist-scroll) { display: none; }' in source
+
+
+# ---------------------------------------------------------------- déploiement : démonstration
+
+
+def demo_folder(tmp_path: Path) -> Path:
+    folder = tmp_path / "demo"
+    folder.mkdir()
+    (folder / "Loutres.pdf").write_bytes(pdf(tmp_path, "demo-a.pdf", OTTERS))
+    (folder / "Volcans.pdf").write_bytes(pdf(tmp_path, "demo-b.pdf", VOLCANOES))
+    return folder
+
+
+def test_demo_mode_indexes_its_documents_once_and_hides_management(
+    pipeline: Pipeline, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DOCASSIST_DEMO_DOCS_DIR", str(demo_folder(tmp_path)))
+
+    app = start()
+
+    text = sidebar_text(app)
+    assert "Loutres.pdf" in text and "Volcans.pdf" in text
+    assert len(app.sidebar.file_uploader) == 0
+    assert not any(b.key and b.key.startswith("delete-") for b in app.sidebar.button)
+    chunks = pipeline.store.count()
+    app.run()
+    restart()  # nouveau processus : les documents déjà indexés ne sont pas réindexés
+    assert pipeline.store.count() == chunks
+    assert len(DocumentRegistry.for_data_dir(Path("data")).records()) == 2
+
+
+def test_demo_mode_starts_from_an_empty_cloud_data_folder(
+    pipeline: Pipeline, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    (tmp_path / "data" / "chroma" / "chroma.sqlite3").unlink()  # disque du cloud : vide
+    pipeline.store.delete_document(CLI_DOC)
+    monkeypatch.setenv("DOCASSIST_DEMO_DOCS_DIR", str(demo_folder(tmp_path)))
+
+    app = start()
+
+    assert not app.chat_input[0].disabled
+    ask(app, "Comment dorment les loutres de mer ?")
+    assert app.main.expander[0].label == "[1] Loutres.pdf — page 1"
+
+
+def test_demo_mode_keeps_management_disabled_even_if_uploads_are_enabled(
+    pipeline: Pipeline, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DOCASSIST_DEMO_DOCS_DIR", str(demo_folder(tmp_path)))
+    monkeypatch.setenv("DOCASSIST_APP_UPLOADS", "true")
+
+    app = start()
+
+    assert len(app.sidebar.file_uploader) == 0
+    assert not any(b.key and b.key.startswith("delete-") for b in app.sidebar.button)
+
+
+def test_missing_demo_folder_does_not_break_the_page(
+    pipeline: Pipeline, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DOCASSIST_DEMO_DOCS_DIR", str(tmp_path / "absent"))
+
+    app = start()
+
+    assert "cours.pdf" in sidebar_text(app)
+    assert len(app.sidebar.file_uploader) == 0
+
+
+def test_local_default_keeps_uploads_and_demo_off(pipeline: Pipeline) -> None:
+    app = start()
+
+    assert len(app.sidebar.file_uploader) == 1
+    assert pipeline.store.count() == 1  # seul le document existant : rien n'est indexé
+
+
+# ---------------------------------------------------------------- déploiement : modèle
+
+
+@pytest.fixture
+def downloads(pipeline: Pipeline, monkeypatch: pytest.MonkeyPatch) -> list[Path]:
+    """Remplace le téléchargement réel (réseau) : enregistre le dossier visé."""
+    calls: list[Path] = []
+
+    def fake_download(settings: Settings) -> Path:
+        calls.append(settings.embedding_model_dir)
+        return settings.embedding_model_dir
+
+    monkeypatch.setattr(model_download, "download_embedding_model", fake_download)
+    return calls
+
+
+def test_missing_model_is_downloaded_once_when_enabled(
+    downloads: list[Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DOCASSIST_MODEL_AUTO_DOWNLOAD", "true")
+
+    app = start()
+    ask(app, "Que font les chats ?")
+    app.run()
+
+    assert downloads == [Path("models") / "multilingual-e5-small"]
+
+
+def test_model_is_never_downloaded_by_default(downloads: list[Path]) -> None:
+    app = start()
+    ask(app, "Que font les chats ?")
+
+    assert downloads == []
+
+
+def test_present_model_is_not_downloaded_again(
+    downloads: list[Path], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    weights = tmp_path / "models" / "multilingual-e5-small" / "model.safetensors"
+    weights.parent.mkdir(parents=True)
+    weights.touch()
+    monkeypatch.setenv("DOCASSIST_MODEL_AUTO_DOWNLOAD", "true")
+
+    start()
+
+    assert downloads == []
+
+
+def test_invalid_auto_download_value_is_reported(
+    downloads: list[Path], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("DOCASSIST_MODEL_AUTO_DOWNLOAD", "parfois")
+
+    app = start()
+
+    assert "DOCASSIST_MODEL_AUTO_DOWNLOAD" in app.error[0].value
+    assert downloads == []

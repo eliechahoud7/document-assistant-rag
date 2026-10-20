@@ -9,6 +9,6 @@ textColor = "#0f172a"
 [browser]
 gatherUsageStats = false
 
-# Écoute locale uniquement : l'interface donne accès au CV et consomme le quota Gemini.
-[server]
-address = "localhost"
+# Pas d'adresse d'écoute ici : Streamlit Community Cloud gère la sienne. En local, l'interface
+# donne accès au CV et consomme le quota Gemini : lancez-la toujours avec
+# « --server.address localhost » (voir README), sinon elle est visible sur le réseau local.
