@@ -2,17 +2,18 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Literal
 
 import chromadb
 from chromadb.api.types import Where
 from chromadb.config import Settings as ChromaSettings
+from chromadb.errors import NotFoundError
 
 from doc_assistant.config import Settings
 from doc_assistant.domain.errors import EmbeddingModelMismatchError
-from doc_assistant.domain.models import Chunk, SearchResult
+from doc_assistant.domain.models import Chunk, IndexedDocument, SearchResult
 from doc_assistant.domain.ports import Embedder
 
 
@@ -23,34 +24,53 @@ class ChromaVectorStore:
     collection à sa création ; rouvrir la collection avec un autre modèle lève
     ``EmbeddingModelMismatchError``. Les vecteurs sont toujours fournis par l'appelant :
     Chroma n'utilise jamais sa fonction d'embedding par défaut (qui téléchargerait un modèle).
+
+    ``dimension`` peut être une fonction : elle n'est alors appelée que pour créer une nouvelle
+    collection. Une collection existante fournit sa dimension enregistrée, et seul le nom du
+    modèle est vérifié : ouvrir l'index (lister, supprimer, rechercher) ne charge pas le modèle.
     """
 
     def __init__(
-        self, path: Path, collection_name: str, embedding_model: str, dimension: int
+        self,
+        path: Path,
+        collection_name: str,
+        embedding_model: str,
+        dimension: int | Callable[[], int],
     ) -> None:
         path.mkdir(parents=True, exist_ok=True)
         self._embedding_model = embedding_model
-        self._dimension = dimension
         self._client = chromadb.PersistentClient(
             path=str(path), settings=ChromaSettings(anonymized_telemetry=False)
         )
-        # Sur une collection existante, get_or_create conserve ses métadonnées d'origine.
-        self._collection = self._client.get_or_create_collection(
-            name=collection_name,
-            configuration={"hnsw": {"space": "cosine"}},
-            metadata={"embedding_model": embedding_model, "dimension": dimension},
-            embedding_function=None,
+        try:
+            self._collection = self._client.get_collection(collection_name, embedding_function=None)
+        except NotFoundError:
+            size = dimension() if callable(dimension) else dimension
+            self._collection = self._client.create_collection(
+                name=collection_name,
+                configuration={"hnsw": {"space": "cosine"}},
+                metadata={"embedding_model": embedding_model, "dimension": size},
+                embedding_function=None,
+            )
+        stored = self._collection.metadata or {}
+        # Dimension connue d'avance : vérifiée ; sinon, celle de la collection (même modèle).
+        self._dimension = (
+            dimension if isinstance(dimension, int) else int(stored.get("dimension", 0))
         )
-        self._check_compatibility(self._collection.metadata or {})
+        self._check_compatibility(stored)
 
     @classmethod
     def from_settings(cls, settings: Settings, embedder: Embedder) -> ChromaVectorStore:
-        """Collection liée au modèle qui produit réellement les vecteurs : celui de l'embedder."""
+        """Collection liée au modèle qui produit réellement les vecteurs : celui de l'embedder.
+
+        La dimension n'est demandée à l'embedder (ce qui charge le modèle) que si la
+        collection doit être créée.
+        """
         return cls(
             settings.chroma_dir,
             settings.chroma_collection,
             embedder.model_name,
-            embedder.dimension,
+            lambda: embedder.dimension,
         )
 
     @property
@@ -73,16 +93,21 @@ class ChromaVectorStore:
                 metadatas=[self._to_metadata(chunk) for chunk in part],
             )
 
-    def search(self, query_embedding: Sequence[float], top_k: int) -> list[SearchResult]:
+    def search(
+        self, query_embedding: Sequence[float], top_k: int, *, doc_id: str | None = None
+    ) -> list[SearchResult]:
         if top_k <= 0:
             raise ValueError("top_k doit être strictement positif")
         available = self._collection.count()
         if available == 0:
             return []
         queries: list[Sequence[float]] = [query_embedding]
+        # Filtre sur les métadonnées de chaque chunk : jamais de chunk d'un autre document.
+        where: Where | None = {"doc_id": doc_id} if doc_id is not None else None
         result = self._collection.query(
             query_embeddings=queries,
             n_results=min(top_k, available),
+            where=where,
             include=["documents", "metadatas", "distances"],
         )
         ids = result["ids"][0]
@@ -127,6 +152,23 @@ class ChromaVectorStore:
 
     def count(self) -> int:
         return self._collection.count()
+
+    def list_documents(self) -> list[IndexedDocument]:
+        """Regroupe les métadonnées de tous les chunks par ``doc_id`` (lecture seule)."""
+        stats: dict[str, IndexedDocument] = {}
+        metadatas: list[Mapping[str, Any]] = list(
+            self._collection.get(include=["metadatas"])["metadatas"] or []
+        )
+        for meta in metadatas:
+            doc_id, page = str(meta["doc_id"]), int(meta["page_number"])
+            known = stats.get(doc_id)
+            stats[doc_id] = IndexedDocument(
+                doc_id,
+                known.filename if known else str(meta["filename"]),
+                (known.chunk_count if known else 0) + 1,
+                max(known.last_page if known else 0, page),
+            )
+        return sorted(stats.values(), key=lambda d: (d.filename.lower(), d.doc_id))
 
     def _check_compatibility(self, stored: Mapping[str, Any]) -> None:
         stored_model = stored.get("embedding_model")

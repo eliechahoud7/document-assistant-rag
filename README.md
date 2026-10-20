@@ -96,7 +96,7 @@ automatiquement : définissez les variables dans la session PowerShell).
 | `DOCASSIST_LLM_TIMEOUT_S` / `_MAX_RETRIES` | `30` / `1` | délai ; nouvelles tentatives sur erreurs serveur uniquement |
 | `GEMINI_API_KEY` | — | clé API, lue uniquement dans l'environnement, jamais affichée ni enregistrée |
 | `DOCASSIST_QUERY_TRANSLATION` | `none` | `fr-en` : traduit les questions françaises pour la recherche uniquement (expérimental, voir [Résultats](#expérience--traduction-fr--en-des-requêtes-et-fusion-rrf-real_v2)) |
-
+| `DOCASSIST_APP_UPLOADS` | `true` | ajout et suppression de documents depuis l'interface web ; `false` pour une bibliothèque en lecture seule (déploiement public) |
 ## Exemple (tiré d'un enregistrement existant)
 
 Réponses réelles extraites de
@@ -255,11 +255,20 @@ Remove-Item Env:DOCASSIST_QUERY_TRANSLATION
 ## Hors périmètre de cette version
 
 Inclus : une interface web Streamlit ([`app.py`](app.py),
-`.\.venv\Scripts\python.exe -m streamlit run app.py`) pour poser des questions sur deux
-collections déjà indexées (`data` et `data\courses`), avec la même configuration LLM que `ask`.
+`.\.venv\Scripts\python.exe -m streamlit run app.py`) qui travaille sur une seule bibliothèque :
+l'index de `DOCASSIST_DATA_DIR` (`data` par défaut), le même que celui des commandes `index`,
+`search` et `ask`. La section « Mes documents » liste les PDF indexés (nom, pages, passages, date
+d'ajout, état), y compris ceux indexés avec la CLI, et persiste entre les sessions grâce au
+registre `<DOCASSIST_DATA_DIR>\documents.json`. On peut y ajouter plusieurs PDF à la fois (même
+pipeline que `index`, même déduplication par SHA-256, sans appel au LLM ; PDF à texte
+sélectionnable, 20 Mo au plus, fichier conservé dans `<DOCASSIST_DATA_DIR>\uploads\`) et
+supprimer un document : seuls ses passages (même `doc_id`), son PDF conservé et son entrée du
+registre sont retirés. Les questions portent sur toute la bibliothèque, avec la même
+configuration LLM que `ask`. Pour un déploiement public, choisissez un dossier sans le CV
+(par exemple `DOCASSIST_DATA_DIR=data\courses`) et `DOCASSIST_APP_UPLOADS=false`.
 
-Hors périmètre : API FastAPI (le paquet `api/` est vide), import de PDF depuis l'interface web
-(l'indexation se fait avec la commande `index`), Docker, reranking ou recherche hybride, et toute
+Hors périmètre : API FastAPI (le paquet `api/` est vide), OCR des PDF scannés, Docker, reranking
+ou recherche hybride, et toute
 nouvelle expérience de recherche (modèle d'embeddings, découpage, top-k) ; seules exceptions, la
 traduction facultative des requêtes et l'expérience RRF décrites dans
 [Résultats](#expérience--traduction-fr--en-des-requêtes-et-fusion-rrf-real_v2).

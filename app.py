@@ -1,7 +1,9 @@
 """Interface web Streamlit : ``streamlit run app.py`` (depuis la racine du projet).
 
-Réutilise le pipeline existant (``bootstrap``) sans le dupliquer. Deux collections, chacune
-avec son propre index Chroma, jamais modifié ici : l'application ne fait que des recherches.
+Réutilise le pipeline existant (``bootstrap``) sans le dupliquer. Une seule bibliothèque de
+documents : l'index de ``DOCASSIST_DATA_DIR`` (``data`` par défaut), le même que celui de la
+CLI (``index``, ``search``, ``ask``). On y ajoute des PDF, on les consulte et on les supprime ;
+les questions portent sur l'ensemble de la bibliothèque, avec citations des sources.
 """
 
 from __future__ import annotations
@@ -9,9 +11,9 @@ from __future__ import annotations
 import html
 import logging
 import os
-from collections.abc import Sequence
-from dataclasses import dataclass, field, replace
-from pathlib import Path
+from collections import Counter
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Literal
 
 import streamlit as st
@@ -19,8 +21,12 @@ import streamlit as st
 from doc_assistant import bootstrap
 from doc_assistant.config import ConfigError, Settings
 from doc_assistant.domain.errors import (
+    DocumentNotFoundError,
+    DocumentRegistryError,
+    DocumentScopeError,
     EmbeddingModelMismatchError,
     EmbeddingModelNotFoundError,
+    IngestionError,
     LLMConfigurationError,
     LLMError,
     LLMQuotaError,
@@ -31,51 +37,53 @@ from doc_assistant.domain.errors import (
 )
 from doc_assistant.domain.models import Answer
 from doc_assistant.domain.ports import Embedder
-from doc_assistant.generation.gemini_generator import API_KEY_ENV
+from doc_assistant.services.library_service import DocumentLibrary, LibraryEntry
 from doc_assistant.services.qa_service import QAService
+from doc_assistant.services.upload_service import MAX_UPLOAD_BYTES
 
 logger = logging.getLogger("doc_assistant.app")
 
+# Gestion des documents (ajout et suppression) depuis l'interface : à désactiver pour un
+# déploiement public, où tout visiteur pourrait sinon modifier la bibliothèque.
+APP_UPLOADS_ENV = "DOCASSIST_APP_UPLOADS"
+_TRUE, _FALSE = ("1", "true", "yes", "on"), ("0", "false", "no", "off")
 
-@dataclass(frozen=True, slots=True)
-class Collection:
-    key: str
-    label: str
-    caption: str
-    data_dir: Path
-    examples: tuple[str, ...]
-
-
-COLLECTIONS: tuple[Collection, ...] = (
-    Collection(
-        "cv",
-        "CV",
-        "Parcours, compétences et expériences",
-        Path("data"),
-        ("Quelles sont les compétences techniques principales ?", "Quel est le parcours ?"),
-    ),
-    Collection(
-        "courses",
-        "Cours",
-        "Supports de cours indexés",
-        Path("data/courses"),
-        ("Comment choisir k dans les k-moyennes ?", "Qu'est-ce que le surapprentissage ?"),
-    ),
-)
-COLLECTIONS_BY_KEY = {collection.key: collection for collection in COLLECTIONS}
-
+# Messages destinés à l'utilisateur, sans détail technique (fournisseur, modèle, variables) :
+# le message d'origine de l'exception est écrit dans le terminal.
 # Ordre important : les sous-classes avant leur classe mère.
-LLM_ERROR_TITLES: tuple[tuple[type[LLMError], str], ...] = (
-    (LLMQuotaError, "Quota Gemini atteint"),
-    (LLMTimeoutError, "Délai de réponse dépassé"),
-    (LLMUnavailableError, "Service Gemini indisponible"),
-    (LLMConfigurationError, "Configuration Gemini refusée"),
-    (LLMResponseError, "Réponse du modèle inexploitable"),
+LLM_ERROR_MESSAGES: tuple[tuple[type[LLMError], str, str], ...] = (
+    (
+        LLMQuotaError,
+        "Limite de requêtes atteinte",
+        "Le service de réponses a atteint sa limite d'utilisation. Réessayez plus tard.",
+    ),
+    (
+        LLMTimeoutError,
+        "Délai de réponse dépassé",
+        "La réponse a pris trop de temps. Réessayez dans quelques instants.",
+    ),
+    (
+        LLMUnavailableError,
+        "Service de réponses indisponible",
+        "Le service de réponses est momentanément indisponible. Réessayez dans quelques instants.",
+    ),
+    (
+        LLMConfigurationError,
+        "Service de réponses mal configuré",
+        "Le service de réponses n'est pas correctement configuré.",
+    ),
+    (
+        LLMResponseError,
+        "Réponse inexploitable",
+        "La réponse obtenue n'a pas pu être exploitée. Reformulez la question ou réessayez.",
+    ),
 )
+SETUP_ERROR_TEXT = "Le service de réponses n'est pas disponible pour le moment."
+LIBRARY_ERROR_TEXT = "Vos documents ne peuvent pas être chargés pour le moment."
 
 
 class SetupError(Exception):
-    """Collection inutilisable : configuration, index ou modèle manquant."""
+    """Bibliothèque ou service de réponses inutilisable : configuration ou modèle manquant."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,14 +102,25 @@ class ChatMessage:
     model: str = ""
     detail: str = ""  # raison de l'abstention ou titre de l'erreur
     sources: tuple[Source, ...] = field(default_factory=tuple)
+    scope: str = ""  # document interrogé (libellé) ; vide : tous les documents
+
+
+@dataclass(frozen=True, slots=True)
+class Notice:
+    """Message affiché après un ajout ou une suppression (conservé jusqu'à l'action suivante)."""
+
+    kind: Literal["success", "info", "error"]
+    text: str
 
 
 # ---------------------------------------------------------------- pipeline
 
 
-def collection_settings(collection: Collection) -> Settings:
-    """Configuration de l'environnement, avec le dossier de données propre à la collection."""
-    return replace(Settings.from_env(), data_dir=collection.data_dir)
+def uploads_enabled(environ: Mapping[str, str]) -> bool:
+    raw = environ.get(APP_UPLOADS_ENV, "true").strip().lower()
+    if raw not in _TRUE + _FALSE:
+        raise ConfigError(f"{APP_UPLOADS_ENV} doit valoir true ou false, reçu {raw!r}")
+    return raw in _TRUE
 
 
 def _embedding_key(settings: Settings) -> str:
@@ -122,12 +141,12 @@ def _embedding_key(settings: Settings) -> str:
 
 @st.cache_resource(show_spinner=False)
 def _cached_embedder(cache_key: str, _settings: Settings) -> Embedder:
-    """Modèle E5 chargé une seule fois, partagé par les deux collections (même modèle)."""
+    """Modèle E5 chargé une seule fois, partagé par la recherche et l'indexation."""
     del cache_key  # sert uniquement de clé de cache
     return bootstrap.build_embedder(_settings)
 
 
-@st.cache_resource(show_spinner=False, max_entries=len(COLLECTIONS))
+@st.cache_resource(show_spinner=False, max_entries=4)
 def _cached_qa_service(cache_key: str, _settings: Settings) -> QAService:
     """Un service par configuration complète : la clé inclut ``data_dir``, donc l'index.
 
@@ -138,17 +157,25 @@ def _cached_qa_service(cache_key: str, _settings: Settings) -> QAService:
     # Configuration LLM vérifiée avant de charger le modèle d'embeddings, comme la CLI.
     generator = bootstrap.build_generator(_settings)
     embedder = _cached_embedder(_embedding_key(_settings), _settings)
-    return bootstrap.build_qa_service(_settings, embedder, generator)
+    service = bootstrap.build_qa_service(_settings, embedder, generator)
+    # Diagnostic pour l'exploitant, hors de l'interface.
+    logger.info(
+        "service de réponses prêt : fournisseur=%s, modèle=%s, index=%s",
+        _settings.llm_provider,
+        generator.model_name,
+        _settings.chroma_dir,
+    )
+    return service
+
+
+def index_exists(settings: Settings) -> bool:
+    return (settings.chroma_dir / "chroma.sqlite3").is_file()
 
 
 def load_service(settings: Settings) -> QAService:
-    """Service de la collection, sans jamais créer d'index (Chroma en créerait un vide)."""
-    index_file = settings.chroma_dir / "chroma.sqlite3"
-    if not index_file.is_file():
-        raise SetupError(
-            f"index introuvable : {index_file}. Lancez l'application depuis la racine du projet "
-            "ou indexez d'abord les documents avec la CLI."
-        )
+    """Service de réponses, sans jamais créer d'index (Chroma en créerait un vide)."""
+    if not index_exists(settings):
+        raise SetupError(f"index introuvable : {settings.chroma_dir / 'chroma.sqlite3'}")
     try:
         return _cached_qa_service(repr(settings), settings)
     except (
@@ -160,7 +187,90 @@ def load_service(settings: Settings) -> QAService:
         raise SetupError(str(exc)) from exc
 
 
-def to_message(answer: Answer) -> ChatMessage:
+@st.cache_resource(show_spinner=False, max_entries=4)
+def _cached_library(cache_key: str, _settings: Settings) -> DocumentLibrary:
+    """Bibliothèque existante (indexation, liste, suppression) ; sans configuration LLM."""
+    del cache_key
+    embedder = _cached_embedder(_embedding_key(_settings), _settings)
+    return bootstrap.build_document_library(_settings, embedder)
+
+
+def get_library(settings: Settings, *, create: bool) -> DocumentLibrary | None:
+    """Bibliothèque de l'index ; ``None`` si l'index n'existe pas encore et ``create`` est
+    faux (l'ouvrir le créerait : seul un premier ajout de PDF le crée)."""
+    if not create and not index_exists(settings):
+        return None
+    try:
+        return _cached_library(repr(settings), settings)
+    except (
+        EmbeddingModelNotFoundError,
+        EmbeddingModelMismatchError,
+        TranslationModelNotFoundError,
+    ) as exc:
+        raise SetupError(str(exc)) from exc
+
+
+def list_documents(library: DocumentLibrary) -> tuple[list[LibraryEntry], str]:
+    """Documents et éventuel avertissement (registre illisible : liste issue de l'index)."""
+    try:
+        return library.documents(), ""
+    except DocumentRegistryError as exc:
+        return library.documents_from_index(), str(exc)
+
+
+def plural(count: int, word: str) -> str:
+    return f"{count} {word}{'s' if count > 1 else ''}"
+
+
+def index_files(settings: Settings, files: Sequence[tuple[str, bytes]]) -> list[Notice]:
+    """Indexe les PDF envoyés un par un (un échec n'empêche pas les suivants)."""
+    try:
+        library = get_library(settings, create=True)
+    except SetupError as exc:
+        return [Notice("error", str(exc))]
+    assert library is not None
+    notices: list[Notice] = []
+    for name, data in files:
+        try:
+            outcome = library.add(name, data)
+        except (IngestionError, DocumentRegistryError) as exc:
+            notices.append(Notice("error", str(exc)))
+            continue
+        except Exception:
+            logger.exception("échec de l'indexation de %s", name)
+            notices.append(Notice("error", f"{name} : erreur inattendue (détail dans le terminal)"))
+            continue
+        if outcome.kind == "duplicate":
+            same = (
+                ""
+                if outcome.duplicate_of == outcome.filename
+                else f" (même contenu que « {outcome.duplicate_of} »)"
+            )
+            notices.append(
+                Notice(
+                    "info",
+                    f"« {outcome.filename} » est déjà dans vos documents{same} : "
+                    "il n'a pas été réindexé.",
+                )
+            )
+        else:
+            entry = outcome.entry
+            notices.append(Notice("success", f"« {entry.filename} » ajouté à vos documents."))
+    return notices
+
+
+def delete_document(settings: Settings, doc_id: str) -> Notice:
+    try:
+        library = get_library(settings, create=False)
+        if library is None:
+            return Notice("error", "aucun index : rien à supprimer.")
+        outcome = library.delete(doc_id)
+    except (SetupError, DocumentNotFoundError, DocumentRegistryError) as exc:
+        return Notice("error", str(exc))
+    return Notice("success", f"« {outcome.filename} » supprimé de vos documents.")
+
+
+def to_message(answer: Answer, scope: str = "") -> ChatMessage:
     if answer.abstained:
         return ChatMessage(
             "assistant",
@@ -168,19 +278,33 @@ def to_message(answer: Answer) -> ChatMessage:
             kind="abstention",
             model=answer.model,
             detail=answer.abstain_reason or "",
+            scope=scope,
         )
     sources = tuple(
         Source(c.number, c.filename, c.page_number, c.chunk.text) for c in answer.citations
     )
-    return ChatMessage("assistant", answer.text, kind="answer", model=answer.model, sources=sources)
+    return ChatMessage(
+        "assistant", answer.text, kind="answer", model=answer.model, sources=sources, scope=scope
+    )
 
 
-def ask(service: QAService, question: str) -> ChatMessage:
+def ask(
+    service: QAService, question: str, *, doc_id: str | None = None, scope: str = ""
+) -> ChatMessage:
+    """Répond à partir de toute la bibliothèque, ou du seul document ``doc_id``.
+
+    Le filtre est appliqué par l'index pendant la recherche ; ``QAService.retrieve`` vérifie
+    en plus, avant l'appel au LLM, qu'aucun passage n'appartient à un autre document.
+    """
     try:
-        return to_message(service.ask(question).answer)
+        return to_message(service.ask(question, doc_id=doc_id).answer, scope)
+    except DocumentScopeError as exc:
+        logger.error("filtre par document non respecté : %s", exc)
+        return ChatMessage("assistant", str(exc), kind="error", detail="Réponse refusée")
     except LLMError as exc:
-        title = next(t for cls, t in LLM_ERROR_TITLES if isinstance(exc, cls))
-        return ChatMessage("assistant", str(exc), kind="error", detail=title)
+        logger.warning("échec de la génération (%s) : %s", type(exc).__name__, exc)
+        title, text = next((t, m) for cls, t, m in LLM_ERROR_MESSAGES if isinstance(exc, cls))
+        return ChatMessage("assistant", text, kind="error", detail=title)
     except ValueError as exc:
         return ChatMessage("assistant", str(exc), kind="error", detail="Question invalide")
     except Exception:
@@ -206,6 +330,20 @@ CSS = """
   background: linear-gradient(135deg, #2563eb, #60a5fa); color: #fff; font-weight: 700;
 }
 .brand-name { font-weight: 700; font-size: 1.1rem; }
+.section-title { font-weight: 700; font-size: .95rem; margin: .25rem 0 .5rem; }
+.count {
+  display: inline-block; min-width: 1.4rem; padding: 0 .45rem; margin-left: .35rem;
+  border-radius: 999px; font-size: .75rem; text-align: center;
+  background: var(--accent-soft); color: var(--accent);
+}
+.doc-name { font-weight: 600; font-size: .9rem; word-break: break-word; }
+.doc-meta { color: var(--muted); font-size: .78rem; line-height: 1.45; }
+.badge {
+  display: inline-block; padding: 0 .5rem; border-radius: 999px; font-size: .72rem;
+  font-weight: 600; margin-top: .2rem;
+}
+.badge-ok { background: #dcfce7; color: #166534; }
+.badge-warn { background: #fef3c7; color: #92400e; }
 .hero { text-align: center; padding: 2.5rem 0 1.5rem; }
 .hero h1 { font-size: 2rem; font-weight: 700; margin-bottom: .35rem; }
 .hero p { color: var(--muted); margin: 0; }
@@ -222,12 +360,11 @@ CSS = """
   margin-left: 12%;
 }
 .meta { color: var(--muted); font-size: .8rem; margin-top: .25rem; }
+[data-testid="stElementContainer"]:has(.docassist-scroll) { display: none; }
 .source-text {
   white-space: pre-wrap; font-size: .85rem; line-height: 1.5; color: #334155;
   border-left: 3px solid var(--accent); padding: .25rem 0 .25rem .75rem;
 }
-.status { font-size: .85rem; line-height: 1.8; }
-.status code { font-size: .78rem; }
 @media (max-width: 640px) {
   .block-container { padding-top: 1.25rem; }
   .hero h1 { font-size: 1.5rem; }
@@ -240,9 +377,37 @@ USER_AVATAR = ":material/person:"
 ASSISTANT_AVATAR = ":material/auto_awesome:"
 
 
+def conversation(scope_key: str) -> list[ChatMessage]:
+    """Historique de la session pour une portée : un ``doc_id``, ou ``ALL_DOCUMENTS``.
+
+    Clé = identifiant du document (jamais son nom) : deux fichiers homonymes ont chacun le leur.
+    """
+    histories: dict[str, list[ChatMessage]] = st.session_state.histories
+    return histories.setdefault(scope_key, [])
+
+
 def reset_conversation() -> None:
-    st.session_state.messages = []
-    st.session_state.pop("pending_question", None)
+    """« Nouvelle conversation » : vide seulement l'historique de la portée affichée."""
+    st.session_state.histories.pop(st.session_state.get("scope", ALL_DOCUMENTS), None)
+
+
+def scroll_to_latest_question(token: str) -> None:
+    """Fait défiler la page jusqu'à la dernière question posée.
+
+    Émis uniquement pendant l'exécution qui traite une question : la page n'est jamais
+    ramenée en bas pendant la lecture d'un ancien message. Le navigateur réexécute le script
+    dès que son contenu change, d'où le jeton ; son conteneur est masqué par la CSS.
+    """
+    st.html(
+        f"<div class='docassist-scroll' data-token='{html.escape(token)}'></div>"
+        "<script>setTimeout(() => {"
+        "const users = [...document.querySelectorAll('[data-testid=\"stChatMessage\"]')]"
+        ".filter((m) => m.querySelector('[data-testid=\"stChatMessageAvatarUser\"]'));"
+        "const last = users[users.length - 1];"
+        "if (last) last.scrollIntoView({behavior: 'smooth', block: 'start'});"
+        "}, 50);</script>",
+        unsafe_allow_javascript=True,
+    )
 
 
 def render_message(message: ChatMessage) -> None:
@@ -254,22 +419,23 @@ def render_message(message: ChatMessage) -> None:
         return
     if message.kind == "abstention":
         st.info(
-            "Je n'ai pas trouvé la réponse dans les documents de cette collection.",
+            f"Je n'ai pas trouvé la réponse dans « {message.scope} »."
+            if message.scope
+            else "Je n'ai pas trouvé la réponse dans vos documents.",
             icon=":material/search_off:",
         )
         if message.content:
             st.markdown(message.content)
         st.markdown(
-            f"<div class='meta'>Raison : {html.escape(message.detail)} · "
-            f"{html.escape(message.model)}</div>",
+            f"<div class='meta'>Raison : {html.escape(message.detail)}</div>",
             unsafe_allow_html=True,
         )
         return
     st.markdown(message.content)
     count = len(message.sources)
+    scope = f"Document : {message.scope}" if message.scope else "Tous les documents"
     st.markdown(
-        f"<div class='meta'>{html.escape(message.model)} · "
-        f"{count} source{'s' if count > 1 else ''}</div>",
+        f"<div class='meta'>{count} source{'s' if count > 1 else ''} · {html.escape(scope)}</div>",
         unsafe_allow_html=True,
     )
     for source in message.sources:
@@ -283,52 +449,143 @@ def render_message(message: ChatMessage) -> None:
             )
 
 
-def render_sidebar(collection_keys: Sequence[str]) -> Collection:
-    with st.sidebar:
-        st.markdown(
-            "<div class='brand'><div class='brand-logo'>D</div>"
-            "<div class='brand-name'>Doc Assistant</div></div>",
-            unsafe_allow_html=True,
+def render_notices() -> None:
+    """Succès : notification discrète, une seule fois. Doublons et erreurs : restent affichés
+    jusqu'à l'action suivante."""
+    notices: list[Notice] = st.session_state.get("notices", [])
+    for notice in notices:
+        if notice.kind == "success":
+            st.toast(notice.text, icon=":material/check_circle:")
+    st.session_state.notices = [n for n in notices if n.kind != "success"]
+    show = {"info": st.info, "error": st.error}
+    for notice in st.session_state.notices:
+        show[notice.kind](notice.text)
+
+
+def document_meta(entry: LibraryEntry) -> str:
+    parts = [] if entry.page_count is None else [plural(entry.page_count, "page")]
+    parts.append(plural(entry.chunk_count, "passage"))
+    if entry.added_at is not None:
+        parts.append(f"ajouté le {entry.added_at.astimezone():%d/%m/%Y à %H:%M}")
+    elif entry.source == "external":
+        parts.append("indexé avec la CLI")
+    return " · ".join(parts)
+
+
+def render_documents(
+    settings: Settings, entries: Sequence[LibraryEntry], warning: str, manage: bool
+) -> None:
+    st.markdown(
+        f"<div class='section-title'>Mes documents<span class='count'>{len(entries)}</span></div>",
+        unsafe_allow_html=True,
+    )
+    if warning:
+        st.warning(warning)
+    if not entries:
+        st.caption(
+            "Aucun document pour l'instant." + (" Ajoutez un PDF ci-dessous." if manage else "")
         )
-        st.caption("Réponses citées, fondées uniquement sur vos documents.")
-        st.divider()
-        key = st.radio(
-            "Collection de documents",
-            collection_keys,
-            format_func=lambda k: COLLECTIONS_BY_KEY[k].label,
-            captions=[COLLECTIONS_BY_KEY[k].caption for k in collection_keys],
-            key="collection",
-            on_change=reset_conversation,  # jamais d'historique mêlant deux collections
+        return
+    for entry in entries:
+        badge = (
+            "<span class='badge badge-ok'>Indexé</span>"
+            if entry.status == "indexed"
+            else "<span class='badge badge-warn'>Absent de l'index</span>"
         )
-        st.button(
-            "Nouvelle conversation",
-            icon=":material/add_comment:",
-            on_click=reset_conversation,
-            width="stretch",
-        )
-    return COLLECTIONS_BY_KEY[key or collection_keys[0]]
+        with st.container(border=True):
+            info, action = st.columns([5, 1], vertical_alignment="center")
+            info.markdown(
+                f"<div class='doc-name'>{html.escape(entry.filename)}</div>"
+                f"<div class='doc-meta'>{html.escape(document_meta(entry))}</div>{badge}",
+                unsafe_allow_html=True,
+            )
+            if manage:
+                with action.popover("", icon=":material/delete:", help="Supprimer ce document"):
+                    st.markdown(
+                        f"Supprimer **{html.escape(entry.filename)}** ? Ses passages seront "
+                        "retirés de l'index ; les autres documents ne sont pas touchés."
+                    )
+                    if st.button(
+                        "Supprimer définitivement",
+                        key=f"delete-{entry.doc_id}",
+                        type="primary",
+                        width="stretch",
+                    ):
+                        notice = delete_document(settings, entry.doc_id)
+                        if notice.kind == "success":
+                            # Son historique disparaît avec lui (un nouvel envoi du même
+                            # contenu, même doc_id, repart d'une conversation vide).
+                            st.session_state.histories.pop(entry.doc_id, None)
+                        st.session_state.notices = [notice]
+                        st.rerun()
 
 
-def render_status(settings: Settings | None, ready: bool) -> None:
-    with st.sidebar:
-        st.divider()
-        st.markdown("**État**")
-        if settings is None:
-            st.markdown("<div class='status'>Configuration invalide</div>", unsafe_allow_html=True)
-            return
-        has_key = bool(os.environ.get(API_KEY_ENV, "").strip())
-        rows = [
-            f"Index : <code>{html.escape(settings.chroma_dir.as_posix())}</code>",
-            f"Modèle : <code>{html.escape(settings.llm_model)}</code>",
-            f"Clé {API_KEY_ENV} : {'configurée' if has_key else 'absente'}",
-            f"Passages : top-{settings.retrieval_top_k} + {settings.context_neighbors} voisin(s)",
-            f"Service : {'prêt' if ready else 'indisponible'}",
-        ]
-        st.markdown(f"<div class='status'>{'<br>'.join(rows)}</div>", unsafe_allow_html=True)
+def render_upload(settings: Settings) -> None:
+    st.markdown("<div class='section-title'>Ajouter des PDF</div>", unsafe_allow_html=True)
+    files = st.file_uploader(
+        "Fichiers PDF",
+        type=["pdf"],
+        accept_multiple_files=True,
+        max_upload_size=MAX_UPLOAD_BYTES // (1024 * 1024),
+        help="PDF à texte sélectionnable (pas d'OCR), 20 Mo maximum par fichier.",
+        key=f"uploader-{st.session_state.uploader_round}",  # nouvelle clé = sélection vidée
+        label_visibility="collapsed",
+    )
+    files = list(files or [])
+    if files:
+        names = ", ".join(f"« {f.name} »" for f in files)
+        st.caption(f"Sélection : {names}")
+    label = f"Indexer {len(files)} fichier{'s' if len(files) > 1 else ''}" if files else "Indexer"
+    if st.button(
+        label,
+        key="index-files",
+        icon=":material/library_add:",
+        type="primary",
+        disabled=not files,
+        width="stretch",
+    ):
+        with st.spinner("Extraction, découpage et calcul des embeddings…"):
+            st.session_state.notices = index_files(
+                settings, [(f.name, f.getvalue()) for f in files]
+            )
+        st.session_state.uploader_round += 1
+        st.rerun()  # liste à jour, et service de réponses disponible dès le premier document
 
 
-def queue_example(question: str) -> None:
-    st.session_state.pending_question = question
+ALL_DOCUMENTS = "__all__"
+ALL_DOCUMENTS_LABEL = "Tous les documents"
+
+
+def document_labels(entries: Sequence[LibraryEntry]) -> dict[str, str]:
+    """Libellé par ``doc_id`` ; deux fichiers de même nom sont distingués par leur identifiant."""
+    names = Counter(e.filename for e in entries)
+    return {
+        e.doc_id: e.filename if names[e.filename] == 1 else f"{e.filename} · {e.doc_id[:8]}"
+        for e in entries
+    }
+
+
+def render_scope(entries: Sequence[LibraryEntry]) -> tuple[str | None, str]:
+    """Choix du document interrogé ; renvoie (``doc_id`` ou ``None`` pour tous, libellé).
+
+    La sélection est conservée entre les réexécutions ; si le document choisi n'existe plus
+    (supprimé), elle revient à « Tous les documents ».
+    """
+    labels = document_labels([e for e in entries if e.status == "indexed"])
+    options = [ALL_DOCUMENTS, *labels]
+    if st.session_state.get("scope") not in options:
+        st.session_state.scope = ALL_DOCUMENTS
+    choice = st.selectbox(
+        "Document interrogé",
+        options,
+        key="scope",
+        format_func=lambda key: ALL_DOCUMENTS_LABEL if key == ALL_DOCUMENTS else labels[key],
+        help="Les réponses ne s'appuient que sur le document choisi.",
+        disabled=not labels,
+    )
+    if choice is None or choice == ALL_DOCUMENTS:
+        return None, ""
+    return choice, labels[choice]
 
 
 def main() -> None:
@@ -337,57 +594,90 @@ def main() -> None:
     )
     logging.getLogger("doc_assistant").setLevel(logging.INFO)
     st.markdown(CSS, unsafe_allow_html=True)
-    st.session_state.setdefault("messages", [])
+    st.session_state.setdefault("histories", {})  # portée -> list[ChatMessage]
+    st.session_state.setdefault("questions_asked", 0)  # jeton du défilement automatique
+    st.session_state.setdefault("uploader_round", 0)
 
-    collection = render_sidebar([c.key for c in COLLECTIONS])
-
-    settings: Settings | None = None
-    service: QAService | None = None
-    setup_error = ""
     try:
-        settings = collection_settings(collection)
-        with st.spinner("Chargement du modèle et de l'index…"):
-            service = load_service(settings)
-    except (ConfigError, SetupError) as exc:
-        setup_error = str(exc)
-    except Exception:
-        logger.exception("échec de l'initialisation de la collection %s", collection.key)
-        setup_error = "erreur inattendue à l'initialisation ; le détail est dans le terminal."
-    render_status(settings, service is not None)
+        settings, manage = Settings.from_env(), uploads_enabled(os.environ)
+    except ConfigError as exc:
+        st.error(f"**Configuration invalide** — {exc}")
+        return
 
+    entries: list[LibraryEntry] = []
+    warning = library_error = setup_error = ""
+    service: QAService | None = None
+    try:
+        with st.spinner("Chargement de vos documents…"):
+            library = get_library(settings, create=False)
+            if library is not None:
+                entries, warning = list_documents(library)
+    except SetupError as exc:
+        logger.error("bibliothèque indisponible : %s", exc)
+        library_error = LIBRARY_ERROR_TEXT
+    except Exception:
+        logger.exception("échec du chargement de la bibliothèque")
+        library_error = LIBRARY_ERROR_TEXT
+    if entries:
+        try:
+            with st.spinner("Préparation du service de réponses…"):
+                service = load_service(settings)
+        except SetupError as exc:
+            logger.error("réponses indisponibles : %s", exc)
+            setup_error = SETUP_ERROR_TEXT
+
+    with st.sidebar:
+        st.markdown(
+            "<div class='brand'><div class='brand-logo'>D</div>"
+            "<div class='brand-name'>Doc Assistant</div></div>",
+            unsafe_allow_html=True,
+        )
+        st.caption("Réponses citées, fondées uniquement sur vos documents.")
+        st.button(
+            "Nouvelle conversation",
+            icon=":material/add_comment:",
+            on_click=reset_conversation,
+            width="stretch",
+        )
+        st.divider()
+        render_notices()
+        render_documents(settings, entries, warning, manage)
+        if manage:
+            st.divider()
+            render_upload(settings)
+
+    doc_id, scope_label = render_scope(entries) if entries else (None, "")
     prompt = st.chat_input(
-        f"Posez une question sur « {collection.label} »…",
+        f"Posez une question sur « {scope_label} »…"
+        if scope_label
+        else "Posez une question sur vos documents…",
         disabled=service is None,
         max_chars=2000,
     )
-    question = prompt if isinstance(prompt, str) else st.session_state.pop("pending_question", None)
-    messages: list[ChatMessage] = st.session_state.messages
+    question = prompt if isinstance(prompt, str) else None
+    messages = conversation(doc_id or ALL_DOCUMENTS)
 
-    if setup_error:
-        st.error(f"**Collection « {collection.label} » indisponible** — {setup_error}")
-        if API_KEY_ENV in setup_error or "DOCASSIST_LLM_PROVIDER" in setup_error:
-            st.code(
-                '$env:DOCASSIST_LLM_PROVIDER = "gemini"\n$env:GEMINI_API_KEY = "..."',
-                language="powershell",
-            )
+    if library_error:
+        st.error(f"**Documents indisponibles** — {library_error}")
+    elif not entries:
+        st.info(
+            "Votre bibliothèque est vide : ajoutez un premier PDF dans la barre latérale."
+            if manage
+            else "Aucun document n'est indexé pour le moment.",
+            icon=":material/upload_file:",
+        )
+    elif setup_error:
+        st.error(f"**Réponses indisponibles** — {setup_error}")
 
     if not messages and not question:
+        count = len(entries)
         st.markdown(
-            f"<div class='hero'><span class='pill'>{html.escape(collection.label)}</span>"
+            f"<div class='hero'><span class='pill'>"
+            f"{html.escape(scope_label) if scope_label else plural(count, 'document')}</span>"
             "<h1>Que voulez-vous savoir ?</h1>"
             "<p>Chaque réponse cite le fichier et la page d'où elle provient.</p></div>",
             unsafe_allow_html=True,
         )
-        if service is not None:
-            columns = st.columns(len(collection.examples))
-            for column, example in zip(columns, collection.examples, strict=True):
-                column.button(
-                    example,
-                    on_click=queue_example,
-                    args=(example,),
-                    width="stretch",
-                    key=f"example-{collection.key}-{example}",
-                )
 
     for message in messages:
         with st.chat_message(
@@ -398,13 +688,17 @@ def main() -> None:
     if question and service is not None:
         user_message = ChatMessage("user", question)
         messages.append(user_message)
+        st.session_state.questions_asked += 1
+        token = str(st.session_state.questions_asked)
         with st.chat_message("user", avatar=USER_AVATAR):
             render_message(user_message)
+        scroll_to_latest_question(f"{token}-question")  # pendant la génération
         with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
-            with st.spinner("Recherche des passages et rédaction de la réponse…"):
-                reply = ask(service, question)
+            with st.spinner("Réflexion en cours…"):
+                reply = ask(service, question, doc_id=doc_id, scope=scope_label)
             render_message(reply)
         messages.append(reply)
+        scroll_to_latest_question(f"{token}-answer")  # réponse affichée sous la question
 
 
 main()

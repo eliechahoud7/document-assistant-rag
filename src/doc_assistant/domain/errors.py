@@ -13,6 +13,23 @@ class EmptyDocumentError(IngestionError):
     """Le document ne contient aucun texte extractible (PDF vide ou scanné)."""
 
 
+class UploadRejectedError(IngestionError):
+    """Fichier envoyé refusé avant indexation (nom, taille ou format invalides)."""
+
+
+class DocumentRegistryError(Exception):
+    """Registre des documents illisible ou impossible à écrire (il n'est jamais écrasé)."""
+
+
+class DocumentNotFoundError(Exception):
+    """Aucun document de la bibliothèque ne correspond à cet identifiant."""
+
+
+class DocumentScopeError(Exception):
+    """Un passage d'un autre document a été retrouvé alors qu'un seul document était demandé
+    (garde-fou : rien n'est alors envoyé au LLM)."""
+
+
 class EmbeddingModelNotFoundError(Exception):
     """Le modèle d'embeddings n'est pas présent localement."""
 
