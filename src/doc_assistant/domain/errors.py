@@ -17,12 +17,25 @@ class UploadRejectedError(IngestionError):
     """Fichier envoyé refusé avant indexation (nom, taille ou format invalides)."""
 
 
+class LibraryClosedError(UploadRejectedError):
+    """La bibliothèque a été supprimée (suppression du compte) pendant ou avant l'envoi : rien
+    n'y est ajouté."""
+
+
 class DocumentRegistryError(Exception):
     """Registre des documents illisible ou impossible à écrire (il n'est jamais écrasé)."""
 
 
 class DocumentNotFoundError(Exception):
     """Aucun document de la bibliothèque ne correspond à cet identifiant."""
+
+
+class DocumentProtectedError(Exception):
+    """Document protégé (document de démonstration) : il ne peut pas être supprimé."""
+
+
+class AuthenticationError(Exception):
+    """Identité absente ou incomplète : aucune bibliothèque personnelle n'est ouverte."""
 
 
 class DocumentScopeError(Exception):

@@ -13,7 +13,12 @@ import pytest
 from conftest import MakePdf
 from doc_assistant import bootstrap
 from doc_assistant.config import Settings
-from doc_assistant.domain.errors import DocumentNotFoundError, DocumentRegistryError
+from doc_assistant.domain.errors import (
+    DocumentNotFoundError,
+    DocumentProtectedError,
+    DocumentRegistryError,
+    UploadRejectedError,
+)
 from doc_assistant.services.library_service import DocumentLibrary
 from fakes import FakeEmbedder
 
@@ -136,3 +141,64 @@ def test_unreadable_registry_falls_back_to_the_index(make_pdf: MakePdf, settings
     fallback = lib.documents_from_index()
 
     assert [(e.filename, e.chunk_count) for e in fallback] == [("Loutres.pdf", 2)]
+
+
+# ---------------------------------------------------------------- bibliothèque d'un visiteur
+
+
+def visitor_library(
+    settings: Settings,
+    protected: frozenset[str],
+    *,
+    max_documents: int | None = None,
+    max_bytes: int | None = None,
+    max_pages: int | None = None,
+) -> DocumentLibrary:
+    return bootstrap.build_document_library(
+        settings,
+        FakeEmbedder(),
+        protected=protected,
+        max_documents=max_documents,
+        max_bytes=max_bytes,
+        max_pages=max_pages,
+    )
+
+
+def test_protected_document_cannot_be_deleted(make_pdf: MakePdf, settings: Settings) -> None:
+    demo = library(settings).add("Volcans.pdf", make_pdf(VOLCANS).read_bytes())
+    lib = visitor_library(settings, frozenset({demo.entry.doc_id}))
+
+    with pytest.raises(DocumentProtectedError):
+        lib.delete(demo.entry.doc_id)
+
+    assert chunks_by_doc(settings) == {"Volcans.pdf": 1}
+
+
+def test_document_quota_ignores_protected_documents_and_allows_duplicates(
+    make_pdf: MakePdf, settings: Settings
+) -> None:
+    demo = library(settings).add("Volcans.pdf", make_pdf(VOLCANS).read_bytes())
+    lib = visitor_library(settings, frozenset({demo.entry.doc_id}), max_documents=2)
+    first = make_pdf([["Premier document ajouté."]], name="a.pdf").read_bytes()
+    lib.add("a.pdf", first)
+    lib.add("b.pdf", make_pdf([["Deuxième document ajouté."]], name="b.pdf").read_bytes())
+
+    with pytest.raises(UploadRejectedError, match="limite de 2 documents"):
+        lib.add("c.pdf", make_pdf([["Troisième document refusé."]], name="c.pdf").read_bytes())
+    again = lib.add("copie.pdf", first)  # contenu déjà présent : pas un nouveau document
+
+    assert again.kind == "duplicate"
+    assert sorted(chunks_by_doc(settings)) == ["Volcans.pdf", "a.pdf", "b.pdf"]
+
+
+def test_size_and_page_limits_are_enforced_by_the_library(
+    make_pdf: MakePdf, settings: Settings
+) -> None:
+    lib = visitor_library(settings, frozenset(), max_bytes=2_000, max_pages=1)
+
+    with pytest.raises(UploadRejectedError, match="trop volumineux"):
+        lib.add("gros.pdf", b"%PDF-1.4" + b"0" * 3_000)
+    with pytest.raises(UploadRejectedError, match="trop de pages"):
+        lib.add("long.pdf", make_pdf(LOUTRES).read_bytes())  # 2 pages
+
+    assert chunks_by_doc(settings) == {}

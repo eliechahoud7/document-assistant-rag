@@ -22,6 +22,9 @@ from doc_assistant.ingestion.pdf_loader import PypdfLoader
 from doc_assistant.services.indexing_service import IndexingService
 from doc_assistant.services.upload_service import (
     MAX_FILENAME_LENGTH,
+    MAX_UPLOAD_BYTES,
+    MEGABYTE,
+    check_upload,
     index_uploaded_pdf,
     safe_filename,
 )
@@ -147,3 +150,44 @@ def test_safe_filename_is_bounded() -> None:
 
     assert len(name) == MAX_FILENAME_LENGTH
     assert name.endswith(".pdf")
+
+
+def test_too_many_pages_is_rejected_before_any_embedding(make_pdf: MakePdf, tmp_path: Path) -> None:
+    service, store = make_service()
+    three_pages = pdf_bytes(make_pdf, [["Page 1."], ["Page 2."], ["Page 3."]])
+
+    with pytest.raises(UploadRejectedError, match=r"trop de pages \(3 ; maximum 2"):
+        index_uploaded_pdf("long.pdf", three_pages, service, tmp_path / "uploads", max_pages=2)
+
+    assert store.count() == 0
+    assert not (tmp_path / "uploads").exists()
+
+
+def test_page_limit_accepts_a_document_at_the_limit(make_pdf: MakePdf, tmp_path: Path) -> None:
+    service, store = make_service()
+
+    result = index_uploaded_pdf(
+        "cours.pdf", pdf_bytes(make_pdf), service, tmp_path / "uploads", max_pages=2
+    )
+
+    assert result.report.page_count == 2
+    assert store.count() > 0
+
+
+def test_unreadable_pdf_still_reports_the_loader_error_with_a_page_limit(tmp_path: Path) -> None:
+    service, _ = make_service()
+
+    with pytest.raises(InvalidPDFError):
+        index_uploaded_pdf(
+            "abime.pdf", b"%PDF-1.4 tronque", service, tmp_path / "uploads", max_pages=50
+        )
+
+
+def test_size_limit_counts_megabytes_like_the_upload_widget() -> None:
+    """Régression : « 20 Mo » affiché dans l'interface, mais « maximum 21 Mo » dans l'erreur
+    (division par 10^6 d'une limite de 20 * 1024 * 1024 octets)."""
+    assert MAX_UPLOAD_BYTES == 20 * MEGABYTE == 20 * 1024 * 1024
+    check_upload("limite.pdf", b"%PDF-" + b"0" * (MAX_UPLOAD_BYTES - 5))  # exactement la limite
+
+    with pytest.raises(UploadRejectedError, match=r"\(20\.0 Mo ; maximum 20 Mo\)"):
+        check_upload("gros.pdf", b"%PDF-" + b"0" * (MAX_UPLOAD_BYTES - 4))
