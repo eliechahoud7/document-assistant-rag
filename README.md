@@ -34,6 +34,42 @@ A bilingual (French/English) PDF question-answering assistant powered by Retriev
 
 ---
 
+## Evaluation
+
+The RAG pipeline was evaluated on 20 questions using a real-document
+dataset covering English and French queries.
+
+### Results
+
+| Metric | Result |
+|---|---:|
+| Questions evaluated | 20 |
+| Answerable questions marked correct | 14/15 (93.3%) |
+| Unanswerable questions correctly rejected | 5/5 (100%) |
+| Citation precision | 100% |
+| Citation recall | 94.74% |
+| Invalid citations | 0 |
+
+### Configuration
+
+- **Embedding model:** `intfloat/multilingual-e5-small`
+- **LLM:** Gemini (`gemini-3.5-flash-lite`)
+- **Chunk size:** 800
+- **Chunk overlap:** 100
+- **Top-k retrieval:** 5
+- **Context neighbors:** 1
+
+> **Note:** These are automated evaluation results based partly on
+> required-fact matching. They are preliminary and have not been
+> independently validated through comprehensive human review.
+
+
+
+
+
+
+
+
 **English summary.** A local-first retrieval-augmented question-answering assistant for PDF
 documents in French and English. PDFs are parsed page by page (pypdf), split into chunks, embedded
 on CPU with `intfloat/multilingual-e5-small`, and stored in ChromaDB. For a question, the top-5
