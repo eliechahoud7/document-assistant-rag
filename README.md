@@ -28,6 +28,10 @@ A bilingual (French/English) PDF question-answering assistant powered by Retriev
 
 ![Answer with source citations](docs/images/answer-with-sources.png)
 
+##  4. Architecture
+
+![RAG application architecture](docs/images/architecture.png)
+
 ---
 
 **English summary.** A local-first retrieval-augmented question-answering assistant for PDF
