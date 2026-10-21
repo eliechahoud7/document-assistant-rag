@@ -1,5 +1,35 @@
 # Intelligent Document Assistant — RAG
 
+<p align="center">
+  <a href="https://document-assistant-rag-elie.streamlit.app">
+    <strong>🚀 Try the Live Demo</strong>
+  </a>
+  &nbsp;|&nbsp;
+  <a href="https://github.com/eliechahoud7/document-assistant-rag">
+    <strong>GitHub Repository</strong>
+  </a>
+</p>
+
+A bilingual (French/English) PDF question-answering assistant powered by Retrieval-Augmented Generation (RAG). Upload documents, ask questions, and receive answers grounded in retrieved passages with source citations.
+
+**Tech stack:** Python · Streamlit · Gemini · ChromaDB · Sentence Transformers · PyTorch · pytest
+
+## Application Preview
+
+### 1. Upload Documents
+
+![Document upload interface](docs/images/document-upload1.png)
+
+### 2. Upload Multiple Documents
+
+![Multiple document upload interface](docs/images/document-upload2.png)
+
+### 3. Answers with Source Citations
+
+![Answer with source citations](docs/images/answer-with-sources.png)
+
+---
+
 **English summary.** A local-first retrieval-augmented question-answering assistant for PDF
 documents in French and English. PDFs are parsed page by page (pypdf), split into chunks, embedded
 on CPU with `intfloat/multilingual-e5-small`, and stored in ChromaDB. For a question, the top-5
