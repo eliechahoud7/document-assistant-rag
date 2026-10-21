@@ -968,6 +968,45 @@ def visitors(sessions_on: Pipeline, tmp_path: Path, monkeypatch: pytest.MonkeyPa
     return sessions_on
 
 
+def test_empty_demo_folder_lets_each_visitor_start_empty_and_upload_privately(
+    pipeline: Pipeline, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Configuration publique sans documents d'exemple : DOCASSIST_DEMO_DOCS_DIR pointe vers
+    le dossier vide versionné ``demo/empty`` et DOCASSIST_SESSION_UPLOADS vaut true (les
+    autres Secrets inchangés). Chaque visiteur part d'une bibliothèque vide et privée."""
+    empty_demo = APP.parent / "demo" / "empty"
+    assert empty_demo.is_dir() and not list(empty_demo.glob("*.pdf"))
+    shutil.rmtree(tmp_path / "data" / "chroma")
+    monkeypatch.setenv("DOCASSIST_DATA_DIR", str(tmp_path / "data"))  # chemin absolu (Chroma)
+    monkeypatch.setattr(bootstrap, "build_document_library", REAL_BUILD_LIBRARY)
+    monkeypatch.setattr(bootstrap, "build_qa_service", REAL_BUILD_QA_SERVICE)
+    monkeypatch.setattr(bootstrap, "build_store", REAL_BUILD_STORE)
+    for name, value in {
+        "DOCASSIST_DEMO_DOCS_DIR": str(empty_demo),
+        "DOCASSIST_SESSION_UPLOADS": "true",
+        "DOCASSIST_APP_UPLOADS": "false",
+        "DOCASSIST_LLM_PROVIDER": "gemini",
+    }.items():
+        monkeypatch.setenv(name, value)
+
+    first, second = start(), start()
+
+    for app in (first, second):
+        text = sidebar_text(app)
+        assert "lecture2.pdf" not in text and "lecture3.pdf" not in text
+        assert "Aucun document pour l'instant" in "\n".join(c.value for c in app.sidebar.caption)
+        assert len(app.sidebar.file_uploader) == 1
+        assert app.chat_input[0].disabled  # rien à interroger avant un premier envoi
+    upload(first, [("Gateaux.pdf", pdf(tmp_path, "c.pdf", CAKES))])
+    ask(first, "Combien de temps cuit un gâteau au chocolat ?")
+
+    assert first.main.expander[0].label == "[1] Gateaux.pdf — page 1"
+    assert delete_buttons(first) == [f"delete-{doc_id(pdf(tmp_path, 'c.pdf', CAKES))}"]
+    second.run()
+    assert "Gateaux.pdf" not in sidebar_text(second)  # privé : invisible pour les autres
+    assert len(session_folders()) == 1
+
+
 @pytest.mark.parametrize(
     "extra_env",
     [
