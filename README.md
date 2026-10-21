@@ -98,7 +98,16 @@ automatiquement : définissez les variables dans la session PowerShell).
 | `DOCASSIST_QUERY_TRANSLATION` | `none` | `fr-en` : traduit les questions françaises pour la recherche uniquement (expérimental, voir [Résultats](#expérience--traduction-fr--en-des-requêtes-et-fusion-rrf-real_v2)) |
 | `DOCASSIST_APP_UPLOADS` | `true` | ajout et suppression de documents depuis l'interface web ; `false` pour une bibliothèque en lecture seule (déploiement public) |
 | `DOCASSIST_MODEL_AUTO_DOWNLOAD` | `false` | `true` : télécharge le modèle d'embeddings au premier démarrage s'il est absent (déploiement) |
-| `DOCASSIST_DEMO_DOCS_DIR` | — | mode démonstration : PDF publics indexés au démarrage ; ajout et suppression toujours désactivés (voir [Déploiement](#déploiement-streamlit-community-cloud)) |
+| `DOCASSIST_DEMO_DOCS_DIR` | — | mode démonstration : PDF publics indexés au démarrage ; ajout et suppression toujours désactivés dans la bibliothèque partagée (voir [Déploiement](#déploiement-streamlit-community-cloud)) |
+| `DOCASSIST_SESSION_UPLOADS` | `false` | mode démonstration uniquement : `true` donne à chaque visiteur une bibliothèque privée et temporaire ([ADR 0009](docs/adr/0009-envois-prives-des-visiteurs.md)) |
+| `DOCASSIST_UPLOAD_MAX_MB` / `_MAX_PAGES` / `_MAX_FILES` | `10` / `50` / `3` | limites des envois d'un visiteur : taille (1 Mo = 1 024 × 1 024 octets, au plus `server.maxUploadSize` = 20) et pages par PDF, documents ajoutés par session |
+| `DOCASSIST_MAX_SESSIONS` | `20` | bibliothèques privées de visiteurs simultanées ; au-delà, l'envoi est refusé et la démonstration reste disponible |
+| `DOCASSIST_USER_LIBRARIES` | `false` | `true` : connexion Google et bibliothèque personnelle persistante par utilisateur ([ADR 0010](docs/adr/0010-bibliotheques-personnelles.md)) ; incompatible avec `DOCASSIST_SESSION_UPLOADS` |
+| `DOCASSIST_USER_STORE` | `chroma-cloud` | base des bibliothèques personnelles : `chroma-cloud` (exige `CHROMA_API_KEY`, `CHROMA_TENANT`, `CHROMA_DATABASE`) ou `local` (`<DOCASSIST_DATA_DIR>\users`, développement uniquement) |
+| `DOCASSIST_ACCOUNT_MAX_DOCUMENTS` | `20` | documents par utilisateur connecté |
+| `DOCASSIST_ACCOUNT_DAILY_QUESTIONS` / `_UPLOADS` | `50` / `20` | questions et envois par utilisateur et par jour (compteurs en mémoire, remis à zéro chaque jour et au redémarrage) |
+| `DOCASSIST_MAX_ACCOUNTS` | `100` | bibliothèques personnelles au plus dans la base ; au-delà, aucun nouveau compte |
+| `DOCASSIST_PRIVACY_URL` | — | obligatoire avec `DOCASSIST_USER_LIBRARIES` : adresse `https://` de votre notice de confidentialité, affichée avant tout envoi |
 
 ## Exemple (tiré d'un enregistrement existant)
 
@@ -308,7 +317,7 @@ src/doc_assistant/
 └── cli.py         # download-model, index, search, ask, evaluate, generate-answers, score-answers
 tests/             # unit/, integration/ (aucun accès réseau)
 evaluation/        # jeux d'évaluation, annexe de réponses, rapports
-docs/              # architecture et ADR 0001 à 0008
+docs/              # architecture et ADR 0001 à 0010
 ```
 
 ## Qualité et tests
@@ -356,6 +365,99 @@ CC BY-NC-SA 4.0). Ni `data/` (index, CV, registre), ni `models/`, ni `.env`, ni
 
 En mode démonstration, l'ajout et la suppression de documents sont toujours désactivés, même si
 `DOCASSIST_APP_UPLOADS` vaut `true`.
+
+### Envois privés des visiteurs (désactivés)
+
+Implémentés mais **désactivés sur le déploiement** tant que la question Gemini/EEE n'est pas
+tranchée ([ADR 0006](docs/adr/0006-generation-gemini.md)) : les passages des PDF envoyés par les
+visiteurs partiraient chez Gemini. Décision et détails : [ADR 0009](docs/adr/0009-envois-prives-des-visiteurs.md).
+
+- Avec `DOCASSIST_SESSION_UPLOADS = "true"` (mode démonstration exigé), un visiteur consulte la
+  démonstration partagée en lecture seule ; à son **premier envoi**, sa session reçoit sa propre
+  copie de la bibliothèque de démonstration dans `data/sessions/<identifiant aléatoire>/`. Un
+  visiteur ne voit jamais les documents d'un autre et ne peut pas supprimer les documents de
+  démonstration.
+- Au plus `DOCASSIST_MAX_SESSIONS` (20) bibliothèques privées à la fois : au-delà, l'envoi est
+  refusé (« réessayez dans quelques minutes ») et la démonstration reste utilisable.
+- Limites vérifiées par le serveur : `DOCASSIST_UPLOAD_MAX_MB` (10), `DOCASSIST_UPLOAD_MAX_PAGES`
+  (50), `DOCASSIST_UPLOAD_MAX_FILES` (3 documents ajoutés par session ; les fichiers en trop
+  d'un envoi sont refusés sans être traités) ; une valeur invalide affiche une erreur de
+  configuration. Streamlit refuse lui-même, dès la réception, tout fichier de plus de 20 Mo
+  (`server.maxUploadSize` dans `.streamlit/config.toml`) ; `DOCASSIST_UPLOAD_MAX_MB` ne peut pas
+  dépasser cette valeur.
+- Conservation : bibliothèque supprimée après 2 heures d'inactivité (ou au redémarrage de
+  l'application sur le cloud) ; le visiteur en est averti sous le bouton d'envoi, avec la
+  consigne de ne pas envoyer de document confidentiel ou personnel.
+- Chaque visiteur reçoit une copie de **tout** l'index de `DOCASSIST_DATA_DIR` : pour un essai
+  local, utilisez un dossier vide dédié (`$env:DOCASSIST_DATA_DIR = "data\demo-test"`), jamais
+  `data` (qui contient le CV).
+
+Pour les activer plus tard, ajoutez aux *Secrets* (en gardant `DOCASSIST_APP_UPLOADS = "false"`) :
+
+```toml
+DOCASSIST_SESSION_UPLOADS = "true"
+# facultatif, valeurs par défaut :
+DOCASSIST_UPLOAD_MAX_MB = "10"
+DOCASSIST_UPLOAD_MAX_PAGES = "50"
+DOCASSIST_UPLOAD_MAX_FILES = "3"
+DOCASSIST_MAX_SESSIONS = "20"
+```
+
+### Bibliothèques personnelles (connexion Google, désactivées)
+
+Implémentées et testées hors ligne, **désactivées par défaut** ; décision, coûts et
+confidentialité : [ADR 0010](docs/adr/0010-bibliotheques-personnelles.md). Chaque utilisateur
+connecté avec Google retrouve sa propre bibliothèque après déconnexion, redémarrage de
+l'application ou sur un autre appareil ; les visiteurs déconnectés gardent la démonstration en
+lecture seule. Les passages sont conservés dans Chroma Cloud (région UE), une collection par
+utilisateur ; aucun PDF n'est gardé sur le serveur. « Supprimer mon compte » efface toutes les
+données de l'utilisateur, et seulement les siennes.
+
+Avant son premier envoi et sa première question, chaque utilisateur doit confirmer avoir 18 ans
+ou plus et accepter de courtes conditions (pas de données sensibles ; passages conservés par
+Chroma et envoyés à Gemini), avec un lien vers **votre** notice de confidentialité
+(`DOCASSIST_PRIVACY_URL`, obligatoire). L'application ne rédige aucune notice et n'affirme
+aucune conformité. L'acceptation est enregistrée avec la bibliothèque dès le premier envoi ;
+rien n'est écrit dans la base pour un utilisateur qui se connecte sans rien envoyer. Limites
+par utilisateur (questions et envois par jour) et nombre maximal de comptes : voir
+[Configuration](#configuration).
+
+**Avant toute activation publique** : offre payante de Gemini pour les utilisateurs de l'EEE
+([ADR 0006](docs/adr/0006-generation-gemini.md)), notice de confidentialité publiée, essai
+manuel de la connexion Google et de Chroma Cloud.
+
+Préparation (une seule fois, hors du dépôt) :
+
+1. La dépendance de connexion est déclarée dans `pyproject.toml` (`streamlit[auth]`, qui ajoute
+   Authlib) ; installez-la en local avec `.\.venv\Scripts\python.exe -m pip install -e .`.
+2. Google Cloud Console : créez un client OAuth « Application Web » avec l'URI de redirection
+   `https://<votre-app>.streamlit.app/oauth2callback` (et `http://localhost:8501/oauth2callback`
+   pour un essai local).
+3. Chroma Cloud : créez une base en région **europe-west1** et une clé API limitée à cette base.
+4. Générez un `cookie_secret` aléatoire (au moins 32 caractères), par exemple
+   `.\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_urlsafe(48))"`.
+5. Dans les *Secrets* de Streamlit Community Cloud (jamais dans un fichier versionné) :
+
+   ```toml
+   DOCASSIST_USER_LIBRARIES = "true"
+   DOCASSIST_PRIVACY_URL = "https://.../confidentialite"
+   CHROMA_API_KEY = "..."
+   CHROMA_TENANT = "..."
+   CHROMA_DATABASE = "..."
+
+   [auth]
+   redirect_uri = "https://<votre-app>.streamlit.app/oauth2callback"
+   cookie_secret = "..."
+   client_id = "....apps.googleusercontent.com"
+   client_secret = "..."
+   server_metadata_url = "https://accounts.google.com/.well-known/openid-configuration"
+   ```
+
+   en gardant `DOCASSIST_APP_UPLOADS = "false"` et sans `DOCASSIST_SESSION_UPLOADS`.
+
+Essai local sans Chroma Cloud : `DOCASSIST_USER_STORE=local` (une base par utilisateur dans
+`<DOCASSIST_DATA_DIR>\users`, jamais `data` qui contient le CV) et un
+`.streamlit\secrets.toml` local (ignoré par Git) avec la section `[auth]`.
 
 ## Sources des documents d'évaluation et licences
 

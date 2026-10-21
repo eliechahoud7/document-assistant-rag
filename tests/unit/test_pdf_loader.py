@@ -116,6 +116,31 @@ def test_failing_page_is_treated_as_empty(
     assert "page 2 : extraction impossible" in caplog.text
 
 
+def test_logs_never_contain_the_uploaded_filename(
+    make_pdf: MakePdf, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Un nom de fichier envoyé peut être une donnée personnelle : les journaux ne gardent que
+    l'identifiant du document (et le type de l'erreur, pas son message)."""
+    path = make_pdf([["Page saine."], ["Page abîmée."], []], name="Dossier-medical-Dupont.pdf")
+    original = PageObject.extract_text
+
+    def flaky(self: PageObject, *args: Any, **kwargs: Any) -> str:
+        text = original(self, *args, **kwargs)
+        if "abîmée" in text:
+            raise ValueError("flux corrompu près de Dupont")
+        return text
+
+    monkeypatch.setattr(PageObject, "extract_text", flaky)
+
+    with caplog.at_level(logging.WARNING, logger="doc_assistant.ingestion.pdf_loader"):
+        document = PypdfLoader().load(path)
+
+    assert f"document {document.doc_id}, page 2 : extraction impossible (ValueError)" in caplog.text
+    assert f"document {document.doc_id} : 2 page(s) sans texte extractible : 2, 3" in caplog.text
+    assert "Dupont" not in caplog.text and "Dossier" not in caplog.text
+    assert document.filename == "Dossier-medical-Dupont.pdf"  # le nom reste dans le document
+
+
 def test_missing_file_raises(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         PypdfLoader().load(tmp_path / "absent.pdf")

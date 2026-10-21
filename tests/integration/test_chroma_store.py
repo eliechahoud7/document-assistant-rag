@@ -1,5 +1,6 @@
 """ChromaDB réel, dans un dossier temporaire, avec des embeddings factices."""
 
+import shutil
 from pathlib import Path
 
 import pytest
@@ -52,6 +53,7 @@ def test_embedding_model_is_stored_in_chunk_metadata(tmp_path: Path) -> None:
     store = open_store(tmp_path)
     fill(store, make_chunks("d1", ["texte"]))
 
+    assert store._collection is not None
     stored = store._collection.get(include=["metadatas"])["metadatas"]
 
     assert stored is not None
@@ -72,6 +74,19 @@ def test_data_persists_after_reopening(tmp_path: Path) -> None:
 
     assert reopened.count() == 2
     assert reopened.has_document("d1")
+
+
+def test_closing_releases_the_files_so_the_folder_can_be_deleted(tmp_path: Path) -> None:
+    """Régression (Windows) : un index ouvert empêchait la suppression de son dossier."""
+    folder = tmp_path / "session" / "chroma"
+    store = open_store(folder)
+    fill(store, make_chunks("d1", ["un", "deux"]))
+
+    store.close()
+    store.close()  # idempotent
+    shutil.rmtree(folder.parent)
+
+    assert not folder.parent.exists()
 
 
 def test_reopening_with_another_model_is_refused(tmp_path: Path) -> None:
