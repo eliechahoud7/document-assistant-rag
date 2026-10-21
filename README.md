@@ -385,22 +385,22 @@ CC BY-NC-SA 4.0). Ni `data/` (index, CV, registre), ni `models/`, ni `.env`, ni
    GEMINI_API_KEY = "..."
    DOCASSIST_LLM_PROVIDER = "gemini"
    DOCASSIST_MODEL_AUTO_DOWNLOAD = "true"
-   DOCASSIST_DEMO_DOCS_DIR = "demo/documents"
+   DOCASSIST_DEMO_DOCS_DIR = "demo/empty"
    DOCASSIST_APP_UPLOADS = "false"
+   DOCASSIST_SESSION_UPLOADS = "true"
    ```
 
-3. Premier démarrage : installation des dépendances, téléchargement du modèle (~493 Mo), puis
-   indexation des PDF de démonstration. Le disque du cloud est temporaire : après une mise en
-   veille, le modèle est retéléchargé et les documents réindexés automatiquement.
+3. Premier démarrage : installation des dépendances et téléchargement du modèle d'embeddings
+   (~493 Mo). L'application démarre sans documents partagés. Chaque visiteur peut téléverser
+   ses propres PDF dans une bibliothèque privée et temporaire. Le disque du cloud est temporaire :
+   après un redémarrage, les fichiers et index temporaires peuvent être perdus.
 
 En mode démonstration, l'ajout et la suppression de documents sont toujours désactivés, même si
 `DOCASSIST_APP_UPLOADS` vaut `true`.
 
-### Envois privés des visiteurs (désactivés)
+### Envois privés des visiteurs (activés)
 
-Implémentés mais **désactivés sur le déploiement** tant que la question Gemini/EEE n'est pas
-tranchée ([ADR 0006](docs/adr/0006-generation-gemini.md)) : les passages des PDF envoyés par les
-visiteurs partiraient chez Gemini. Décision et détails : [ADR 0009](docs/adr/0009-envois-prives-des-visiteurs.md).
+Les envois privés sont **activés sur le déploiement**. Chaque visiteur peut ajouter ses propres PDF dans une bibliothèque temporaire et privée. Les passages récupérés sont envoyés à Gemini pour générer les réponses. Ne téléversez aucun document confidentiel ou personnel. Voir [ADR 0009](docs/adr/0009-envois-prives-des-visiteurs.md) pour les détails.
 
 - Avec `DOCASSIST_SESSION_UPLOADS = "true"` (mode démonstration exigé), un visiteur consulte la
   démonstration partagée en lecture seule ; à son **premier envoi**, sa session reçoit sa propre
