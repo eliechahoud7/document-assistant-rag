@@ -1,4 +1,5 @@
 # Intelligent Document Assistant — RAG
+Technologies: Python · RAG · ChromaDB · Sentence Transformers · Google Gemini · Streamlit
 
 **English summary.** A local-first retrieval-augmented question-answering assistant for PDF
 documents in French and English. PDFs are parsed page by page (pypdf), split into chunks, embedded
